@@ -1,0 +1,9 @@
+"abc\t\r\a\b\v\\\f"
+"abc \x9A\xAF"
+"abc \u{1FA}"
+"abc\z      
+abc"
+"abc\88\8\012"
+"abc\
+abc"
+

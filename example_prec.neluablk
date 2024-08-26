@@ -1,0 +1,2 @@
+foo = a or b and c
+bar = a and b or c

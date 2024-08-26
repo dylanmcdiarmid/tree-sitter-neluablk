@@ -1,0 +1,10 @@
+--[[ abc ]]
+-- hello
+-- [[
+--[[a
+long
+]]
+-- short comment 2
+hello bonjour --[[a]]
+hello --abc
+-- last stuff!

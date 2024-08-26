@@ -1,0 +1,14 @@
+## some short stuff
+## for i = 10
+##[[for boop
+this isa boop
+]]
+##[=[
+whatever = [[string]]
+##]=]
+[[ long string
+a block
+]]
+[=[ long string
+a block]]
+]=]

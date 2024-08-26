@@ -1,0 +1,9 @@
+##[[]]
+##[[hello]]
+##[[a
+b
+c
+]]
+hello bonjour --short comment
+--[=[long
+comment]]=]

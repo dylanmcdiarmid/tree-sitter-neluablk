@@ -1,0 +1,40 @@
+{
+  "name": "tree-sitter-neluablk",
+  "module": "index.ts",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prebuildify": "^6.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "tree-sitter-cli": "^0.22.6",
+    "node-addon-api": "^7.1.0",
+    "node-gyp-build": "^4.8.0"
+  },
+  "scripts": {
+    "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --strip"
+  },
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
+  "tree-sitter": [
+    {
+      "scope": "source.neluablk",
+      "injection-regex": "^neluablk$",
+      "highlights": ["queries/highlights.scm"],
+      "injections": "queries/injections.scm",
+      "file-types": ["neluablk"]
+    }
+  ]
+}
