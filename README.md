@@ -4,6 +4,8 @@ Eventually this will be a complete tree-sitter implementation of Nelua with a fu
 
 Currently a work in progress, everything is quite messy and will remain that way until the cleanup phase.
 
+This repo will be broken most days until I get through a few more phases. [worklog](Workflow.md) will keep updates of the daily work. 
+ 
 # Phases
 
 ### Phase 1
@@ -21,6 +23,7 @@ Implement the rest of the grammar.js, following the Nelua PEG grammar, while att
 suited to syntax highlighting rather than copying what makes sense for Nelua.
 
 Basic testing will be done during this phase by running `tree-sitter parse` on example files. AST is not final.
+
 
 Tracking features as they are completed in: [features.md](features.md)
 

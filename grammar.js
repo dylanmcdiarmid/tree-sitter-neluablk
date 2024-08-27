@@ -30,7 +30,7 @@ const PREC = {
   CALL: 15,
   FIELD: 16,
   SUBSCRIPT: 17,
-};
+}
 
 const numberTypeEndings = [
   'i', 'integer',
@@ -153,7 +153,7 @@ const rules = {
 
   simple_expression: $ => {
     // TODO Add each simple expression
-    return choice($.Number, $.String, $.Boolean, $.Nilptr, $.Nil, $.InitList, $.Function)
+    return choice($.Number, $.String, $.Boolean, $.Nilptr, $.Nil, $.Varargs, $.InitList, $.Function)
   },
 
    
@@ -279,10 +279,28 @@ const rules = {
   },
   Nilptr: _ => 'nilptr',
   Nil: _ => 'nil',
+  Varargs: _ => '...',
+  Id: $ => {
+    return $.Name
+  },
+  // PEG: idsuffixed
+  IdSuffixed: $ => {
+    return seq($.Id, repeat1(seq('.', $.Name)))
+  },
+  // PEG: funcname
+  FuncName: $ => {
+    return
+  },
+  IdDecl: $ => {
+    return seq($.Id, optional($.typeexpr))
+  },
+  IdDecls: $ => {
+    return listOf($.IdDecl, ',')
+  },
   InitList: $ => {
     return seq(
       '{',
-      optional(listOf($.field), choice(',', ';')),
+      optional(listOf($.field), $.fieldsep),
       '}',
     )
   },
@@ -291,6 +309,9 @@ const rules = {
           $.Pair,
           $.expression
         )
+  },
+  fieldsep: _ => {
+    return choice(',', ';')
   },
   Function: $ => {
     return seq('function', $.FunctionBody)
@@ -301,6 +322,105 @@ const rules = {
   },
 
    // <<-- END SIMPLE EXPRESSIONS -->>
+
+   // <<-- TYPE EXPRESSIONS -->>
+   typeexpr: $ => {
+     return seq(
+       $.typeexprunary, 
+       optional($.typevaris),
+     )
+   },
+   // [ ] typexprsimple   <-- RecordType / UnionType / EnumType / FuncType / ArrayType / PointerType /
+   //                     VariantType / (typeexprprim typeopgen?)~>foldleft
+   typeexprsimple: $ => {
+     return choice(
+       $.RecordType,
+       $.UnionType,
+       $.EnumType,
+       $.FuncType,
+       $.ArrayType,
+       $.PointerType,
+       $.VariantType, 
+       seq($.typeexprprim, optional($typeopgen))
+     )
+   },
+   // [x] typevaris : VariantType   <== `|` @typeexpruary (`|` @typeexprunary)*
+   typevaris: $ => {
+     return repeat1(seq('|', $.typeexprunary)) 
+   },
+
+   // [x] typeexprprim    <-- idsuffixed / id
+   typeexprprim: $ => {
+     return choice($.Id, $.IdSuffixed)
+   },
+   // [ ] annots          <-| `<` @Annotation (`,` @Annotation)* @`>`
+   annots: $ => {
+   },
+   
+   // typeopunary     <-- typeopptr / typeopopt / typeoparr
+   typeopunary: $ => {
+     return choice($.typeopptr, $.typeopopt, $.typeoparr)
+   },
+   typeopptr: _ => '*',
+   typeopopt: _ => '?',
+   typeoparr: $ => {
+     return seq('[', optional($.expression), ']')
+   },
+   // <<-- END TYPE EXPRESSIONS -->>
+
+   // <<-- TYPES -->
+   // -- Types
+   // [x] RecordType      <== 'record' WORDSKIP @`{` (RecordField (fieldsep RecordField)* fieldsep?)? @`}`
+   RecordType: $ => {
+     return seq(
+       'record', 
+       '{', 
+       repeat(
+         seq(
+           $.RecordField, 
+           repeat($.fieldsep, $.RecordField), 
+           optional($.fieldsep)
+         )
+       ),
+       '}'
+     )
+   },
+   RecordField: $ => {
+     return seq($.Name, ':', $.typeexpr)
+   },
+   // [x] UnionType       <== 'union' WORDSKIP @`{` (UnionField (fieldsep UnionField)* fieldsep?)? @`}`
+   UnionType: $ => {
+     return seq(
+       'union',
+       '{',
+       repeat(
+         seq(
+           $.UnionField, 
+           repeat($.fieldsep, $.UnionField), 
+           optional($.fieldsep)
+         )
+       ),
+       '}'
+     ) 
+   },
+   // [x] UnionField      <== name `:` @typeexpr / $false typeexpr
+   UnionField: $ => {
+     return choice(seq($.Name, ':', $.typeexpr), $.typeexpr)
+   },
+   // [ ] EnumType        <== 'enum' WORDSKIP (`(` @typeexpr @`)`)~? @`{` @enumfields @`}`
+   EnumType: $ => {},
+   // [ ] EnumField       <== name (`=` @expr)?
+   EnumField: $ => {
+   },
+   FuncType: $ => {},
+   // [ ] ArrayType       <== 'array' WORDSKIP @`(` @typeexpr (`,` @expr)? @`)`
+   ArrayType: $ => {},
+   // [ ] PointerType     <== 'pointer' WORDSKIP (`(` @typeexpr @`)`)?
+   PointerType: $ => {},
+   // [ ] VariantType     <== 'variant' WORDSKIP `(` @typearg (`,` @typearg)* @`)`
+   VariantType: $ => {},
+   // [ ] VarargsType     <== `...` (`:` @name)?
+   // <<-- END TYPES -->
 
 
 
@@ -341,6 +461,15 @@ const rules = {
   },
   Name: $ => {
     return seq($._name_prefix, $._name_suffix)
+  },
+  // PreprocessExpr `#[` {@expr->0} @`]#`
+  // I'm pretty sure the body is Lua, not Nelua, so we'll just capture anything and inject highlighting
+  pp_expr: $ => {
+    return seq('#[', field('body', anythingButLineBreakRe), '#]')
+  },
+  // PreprocessName
+  pp_name: $ => {
+    return seq('#|', field('body', anythingButLineBreakRe), '#|')
   },
   // string_block: $ => {
   //   return seq($.string_block_start, repeat($.string_content), $.string_block_end)
