@@ -1,5 +1,24 @@
 [
   {
+    "type": "Annotation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "annotargs",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "Block",
     "named": true,
     "fields": {},
@@ -29,6 +48,128 @@
         },
         {
           "type": "string_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Boolean",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "ColonIndex",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "DotIndex",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Function",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "FunctionBody",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Id",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "IdDecl",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "IdSuffixed",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InitList",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "field",
+          "named": true
+        },
+        {
+          "type": "fieldsep",
           "named": true
         }
       ]
@@ -86,6 +227,59 @@
     }
   },
   {
+    "type": "Pair",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "RecordField",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "RecordType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "RecordField",
+          "named": true
+        },
+        {
+          "type": "fieldsep",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "String",
     "named": true,
     "fields": {},
@@ -99,6 +293,71 @@
         },
         {
           "type": "string_fragment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "UnionField",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "UnionType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "UnionField",
+          "named": true
+        },
+        {
+          "type": "fieldsep",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "annotargs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "InitList",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "pp_expr",
           "named": true
         }
       ]
@@ -197,6 +456,30 @@
     }
   },
   {
+    "type": "field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Pair",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fieldsep",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "hex_number",
     "named": true,
     "fields": {}
@@ -249,6 +532,11 @@
   },
   {
     "type": "number_type_decl",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "pp_expr",
     "named": true,
     "fields": {}
   },
@@ -309,11 +597,35 @@
       "required": true,
       "types": [
         {
+          "type": "Boolean",
+          "named": true
+        },
+        {
+          "type": "Function",
+          "named": true
+        },
+        {
+          "type": "InitList",
+          "named": true
+        },
+        {
+          "type": "Nil",
+          "named": true
+        },
+        {
+          "type": "Nilptr",
+          "named": true
+        },
+        {
           "type": "Number",
           "named": true
         },
         {
           "type": "String",
+          "named": true
+        },
+        {
+          "type": "Varargs",
           "named": true
         }
       ]
@@ -329,6 +641,116 @@
       "types": [
         {
           "type": "Block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeexpr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typeexprunary",
+          "named": true
+        },
+        {
+          "type": "typevaris",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeexprsimple",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "RecordType",
+          "named": true
+        },
+        {
+          "type": "UnionType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeexprunary",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typeexprsimple",
+          "named": true
+        },
+        {
+          "type": "typeopunary",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeoparr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeopunary",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "typeoparr",
+          "named": true
+        },
+        {
+          "type": "typeopopt",
+          "named": true
+        },
+        {
+          "type": "typeopptr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typevaris",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typeexprunary",
           "named": true
         }
       ]
@@ -389,6 +811,18 @@
     "named": false
   },
   {
+    "type": "#[",
+    "named": false
+  },
+  {
+    "type": "#]",
+    "named": false
+  },
+  {
+    "type": "#|",
+    "named": false
+  },
+  {
     "type": "$",
     "named": false
   },
@@ -398,6 +832,14 @@
   },
   {
     "type": "'",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
     "named": false
   },
   {
@@ -413,7 +855,51 @@
     "named": false
   },
   {
+    "type": ":",
+    "named": false
+  },
+  {
     "type": "::",
+    "named": false
+  },
+  {
+    "type": ";",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": "FunctionBody",
+    "named": true
+  },
+  {
+    "type": "Nil",
+    "named": true
+  },
+  {
+    "type": "Nilptr",
+    "named": true
+  },
+  {
+    "type": "Varargs",
+    "named": true
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
     "named": false
   },
   {
@@ -457,6 +943,10 @@
     "named": false
   },
   {
+    "type": "false",
+    "named": false
+  },
+  {
     "type": "float128",
     "named": false
   },
@@ -466,6 +956,10 @@
   },
   {
     "type": "float64",
+    "named": false
+  },
+  {
+    "type": "function",
     "named": false
   },
   {
@@ -557,6 +1051,10 @@
     "named": false
   },
   {
+    "type": "name",
+    "named": false
+  },
+  {
     "type": "not",
     "named": false
   },
@@ -566,6 +1064,10 @@
   },
   {
     "type": "or",
+    "named": false
+  },
+  {
+    "type": "record",
     "named": false
   },
   {
@@ -586,6 +1088,18 @@
   },
   {
     "type": "string_fragment",
+    "named": true
+  },
+  {
+    "type": "true",
+    "named": false
+  },
+  {
+    "type": "typeopopt",
+    "named": true
+  },
+  {
+    "type": "typeopptr",
     "named": true
   },
   {
@@ -637,11 +1151,27 @@
     "named": false
   },
   {
+    "type": "union",
+    "named": false
+  },
+  {
     "type": "us",
     "named": false
   },
   {
     "type": "usize",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "}",
     "named": false
   },
   {

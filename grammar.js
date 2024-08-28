@@ -117,10 +117,17 @@ const rules = {
       $.binary_expression,
       $.unary_expression,
       // PEG: exprsimple
-      $.simple_expression
+      $.simple_expression,
+      // just used for testing
+      // $._temporary_expression
       // $.simple_expression,
       // $.primary_expression
     )
+  },
+
+  // used for testing things that may be difficult to get to
+  _temporary_expression: $ => {
+    return $.field
   },
 
   binary_expression: $ => {
@@ -260,6 +267,8 @@ const rules = {
   */
   escape_sequence: _ => {
     const seqs = [
+
+- [ ] Add Pair
       /[trabvf\\]/,
       /x[0-9a-fA-F]{2}/,
       // e.g. u{09AF}
@@ -287,9 +296,17 @@ const rules = {
   IdSuffixed: $ => {
     return seq($.Id, repeat1(seq('.', $.Name)))
   },
-  // PEG: funcname
+  // funcname        <-- (id DotIndex* ColonIndex?)~>rfoldright
   FuncName: $ => {
-    return
+    return seq($.Id, repeat($.DotIndex), optional($.ColonIndex))
+  },
+  // DotIndex        <== `.` @name
+  DotIndex: $ => {
+    return seq('.', $.Name)
+  },
+  // ColonIndex      <== `:` @name
+  ColonIndex: $ => {
+    return seq(':', $.Name)
   },
   IdDecl: $ => {
     return seq($.Id, optional($.typeexpr))
@@ -300,7 +317,7 @@ const rules = {
   InitList: $ => {
     return seq(
       '{',
-      optional(listOf($.field), $.fieldsep),
+      optional(listOf($.field, $.fieldsep)),
       '}',
     )
   },
@@ -309,6 +326,14 @@ const rules = {
           $.Pair,
           $.expression
         )
+  },
+  // Pair            <== `[` @expr @`]` @`=` @expr / name `=` @expr / `=` @id -> pair_sugar
+  Pair: $ => {
+    return choice(
+      seq('[', $.expression, ']', '=', $.expression),
+      seq('name', '=', $.expression),
+      // TODO: I don't know what pair_sugar is supposed to do. I didn't see anything in the tests that wouldn't be captured by the first two choices.
+    )
   },
   fieldsep: _ => {
     return choice(',', ';')
@@ -336,14 +361,20 @@ const rules = {
      return choice(
        $.RecordType,
        $.UnionType,
-       $.EnumType,
-       $.FuncType,
-       $.ArrayType,
-       $.PointerType,
-       $.VariantType, 
-       seq($.typeexprprim, optional($typeopgen))
+       // $.EnumType,
+       // $.FuncType,
+       // $.ArrayType,
+       // $.PointerType,
+       // $.VariantType, 
+       // seq($.typeexprprim, optional($typeopgen))
      )
    },
+
+   // typeexprunary   <-- (typeopunary* typexprsimple)->rfoldleft
+   typeexprunary: $ => {
+     return seq(repeat($.typeopunary), $.typeexprsimple)
+   },
+
    // [x] typevaris : VariantType   <== `|` @typeexpruary (`|` @typeexprunary)*
    typevaris: $ => {
      return repeat1(seq('|', $.typeexprunary)) 
@@ -353,10 +384,23 @@ const rules = {
    typeexprprim: $ => {
      return choice($.Id, $.IdSuffixed)
    },
-   // [ ] annots          <-| `<` @Annotation (`,` @Annotation)* @`>`
+   // [x] annots          <-| `<` @Annotation (`,` @Annotation)* @`>`
    annots: $ => {
+     return seq('<', listOf($.Annotation), '>')
    },
-   
+   // name annotargs?
+   Annotation: $ => {
+     return seq($.Name, optional($.annotargs))
+   },
+   // annotargs       <-| `(` (expr (`,` @expr)*)? @`)` / InitList / String / PreprocessExpr
+   annotargs: $ => {
+     return choice(
+       seq('(', optional(listOf($.expression)), ')'),
+       $.InitList,
+       $.String,
+       $.pp_expr,
+     )
+   },
    // typeopunary     <-- typeopptr / typeopopt / typeoparr
    typeopunary: $ => {
      return choice($.typeopptr, $.typeopopt, $.typeoparr)
@@ -377,8 +421,7 @@ const rules = {
        '{', 
        repeat(
          seq(
-           $.RecordField, 
-           repeat($.fieldsep, $.RecordField), 
+           listOf($.RecordField, $.fieldsep),
            optional($.fieldsep)
          )
        ),
@@ -395,8 +438,7 @@ const rules = {
        '{',
        repeat(
          seq(
-           $.UnionField, 
-           repeat($.fieldsep, $.UnionField), 
+           listOf($.UnionField, $.fieldsep),
            optional($.fieldsep)
          )
        ),
@@ -407,18 +449,48 @@ const rules = {
    UnionField: $ => {
      return choice(seq($.Name, ':', $.typeexpr), $.typeexpr)
    },
-   // [ ] EnumType        <== 'enum' WORDSKIP (`(` @typeexpr @`)`)~? @`{` @enumfields @`}`
-   EnumType: $ => {},
-   // [ ] EnumField       <== name (`=` @expr)?
-   EnumField: $ => {
+   // [x] EnumType        <== 'enum' WORDSKIP (`(` @typeexpr @`)`)~? @`{` @enumfields @`}`
+   // enumfields      <-| EnumField (fieldsep EnumField)* fieldsep?
+   EnumType: $ => {
+     return seq(
+       'enum',
+       optional(seq('(', $.typeexpr, ')')),
+       '{',
+       seq(
+         listOf($.EnumField, $.fieldsep), 
+         optional($.fieldsep)
+       ),
+       '}'
+     )
    },
-   FuncType: $ => {},
+   // [x] EnumField       <== name (`=` @expr)?
+   EnumField: $ => {
+     return seq($.name, optional(seq('=', $.expression)))
+   },
+   // FuncType        <== 'function' WORDSKIP @`(` functypeargs @`)`(`:` @funcrets)?
+   FuncType: $ => {
+     return seq(
+       'function',
+       '(',
+    )
+   },
+   // functypeargs    <-| (functypearg (`,` functypearg)* (`,` VarargsType)? / VarargsType)?
+   functypeargs: $ => {},
+   functypearg: $ => {
+     return choice($.typeddecl, $.typeexpr)
+   },
+   // typeddecl    : IdDecl <== name `:` @typeexpr annots?
+   typeddecl: $ => {
+     return seq($.Name, ':', $.typeexpr, optional($.annots))
+   },
+   // funcrets        <-| `(` typeexpr (`,` @typeexpr)* @`)` / typeexpr
+   funcrets: $ => {},
    // [ ] ArrayType       <== 'array' WORDSKIP @`(` @typeexpr (`,` @expr)? @`)`
-   ArrayType: $ => {},
+   // ArrayType: $ => {},
    // [ ] PointerType     <== 'pointer' WORDSKIP (`(` @typeexpr @`)`)?
-   PointerType: $ => {},
+   // PointerType: $ => {},
    // [ ] VariantType     <== 'variant' WORDSKIP `(` @typearg (`,` @typearg)* @`)`
-   VariantType: $ => {},
+   // VariantType: $ => {},
    // [ ] VarargsType     <== `...` (`:` @name)?
    // <<-- END TYPES -->
 
@@ -465,11 +537,11 @@ const rules = {
   // PreprocessExpr `#[` {@expr->0} @`]#`
   // I'm pretty sure the body is Lua, not Nelua, so we'll just capture anything and inject highlighting
   pp_expr: $ => {
-    return seq('#[', field('body', anythingButLineBreakRe), '#]')
+    return seq('#[', field('body', anythingButLinebreakRe), '#]')
   },
   // PreprocessName
   pp_name: $ => {
-    return seq('#|', field('body', anythingButLineBreakRe), '#|')
+    return seq('#|', field('body', anythingButLinebreakRe), '#|')
   },
   // string_block: $ => {
   //   return seq($.string_block_start, repeat($.string_content), $.string_block_end)
