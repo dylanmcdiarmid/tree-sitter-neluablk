@@ -1,3 +1,14 @@
+### 8-28-2024
+Confirmed from Discord and a bit of experimentation that the last pair choice is simply `seq('=', $.Id)`. The pair_sugar in the PEG is there to make `a = { = b }` and `a = { b = b }` return the same ast (and a reminder you can run `nelua --print-ast example_whatever.nelua` to see the AST from the PEG parser).
+
+- [x] Finish first pass at type expressions and everything related
+- [x] Find and implement variable assignment, and then attempt to get everything running. This should allow us to do test passes on each type declaration.
+  - In the PEG, variable assignment starts at the Assign rule 
+  - [ ] Assign is part of the Statements section, which we've already started, so let's continue that for now
+    - ForNum seems a bit weird, I'm not quite sure how to read the ~? syntax, optional capture. I think it's used to fill a node with a nil value if its not found. We'll need to do some extra testing in this area though.
+
+At the end of this work session, I've got a first pass completed for everything in the Statement section. I think I'm missing `suffixeddecls`, but most dependency rules I was able to implement.
+
 ### 8-27-2024
 It's easy when following the PEG to keep diving into the syntax and finding yourself writing too much code without running any tests. I've added a rule called "temporary_expression" that can be read off the top level, which should give me a place to comment/uncomment in test rules.
 
@@ -7,6 +18,7 @@ This issue has been marked as resolved on July 5th by https://github.com/tree-si
 
 Updating to 0.23.0 resulted in a much better error message.
 
+
 After trying out the approach of using temporary_expression to surface deep rules, I ran into problems with it finding conflicts that I think only exist because we are trying to surface those rules. So this approach doesn't actually work too well. I think I'll return to just filling in rules, and perhaps running a bit more often. Focusing on getting the Return rule working may be a good way to test a lot of nested rules (its used in the PEG tests quite a bit).
 
 - [x] Figure out how to get better error message
@@ -14,11 +26,7 @@ After trying out the approach of using temporary_expression to surface deep rule
 - [x] Add typeexprunary
 - [x] Add Pair
   - I asked about how to read the pair_sugar portion of the PEG in the Nelua discord, for now I only have the first two options implemented
-- [ ] Test $.Pair
-- [ ] Test $.InitList
-- [ ] Get running again
-- [ ] Test RecordType
-- [ ] Test UnionType
+- [x] Get running again
 
 ### 8-26-2024
 Going a bit broad today, sketching out a bunch of stuff straight out of the PEG.  Didn't really reference any other tree-sitters today, just trying to get a bunch of rules added with their corresponding PEG info. This will certainly leave everything in a broken state. Once most of the type declarations have a first pass done, it's likely I'll try and figure out a way to test those.

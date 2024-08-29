@@ -95,17 +95,180 @@ const rules = {
     return choice(
       $.Label, // remove? 
       $.expression, // remove? 
-      $.comment, $.string_block, $.short_pp, $.long_pp)
+      $.Assign,
+      $.comment, 
+      $.string_block, 
+      $.short_pp, 
+      $.long_pp,
+    )
   },
   _statement: $ => {
     return choice($.Label)
   },
   // -- Statements
+  // [x] Label           <== `::` @name @`::`
   Label: $ => {
     return seq('::', $.Name, '::')
   },
+  // [x] Return          <== `return` (expr (`,` @expr)*)?
   Return: $ => {
-    return seq(`return`, listOf($.expression))
+    return seq('return', listOf($.expression))
+  },
+  // [x] In              <== `in` @expr
+  In: $ => {
+    return seq('in', $.expression)
+  },
+// [x] Break           <== `break`
+  Break: _ => 'break',
+// [x] Continue        <== `continue`
+  Continue: _ => 'continue',
+// [x] Fallthrough     <== `fallthrough`
+  Fallthrough: _ => 'fallthrough',
+// [x] Goto            <== `goto` @name
+  Goto: $ => {
+    return seq('goto', $.Name)
+  },
+// [x] Do              <== `do` Block @`end`
+  Do: $ => {
+    return seq('do', $.Block, 'end')
+  },
+// [x] Defer           <== `defer` Block @`end`
+  Defer: $ => {
+    return seq('defer', $.Block, 'end')
+  },
+// [x] While           <== `while` @expr @`do` Block @`end`
+  While: $ => {
+    return seq('while', $.expression, 'do', $.Block, 'end')
+  },
+// [x] Repeat          <== `repeat` Block @`until` @expr
+  Repeat: $ => {
+    return seq('repeat', $.Block, 'until', $.expression)
+  },
+// [x] If              <== `if` ifs (`else` Block)? @`end`
+  If: $ => {
+    return seq('ifs', $.ifs, optional(seq('else', $.Block)), 'end')
+  },
+// [x] ifs             <-| @expr @`then` Block (`elseif` @expr @`then` Block)*
+  ifs: $ => {
+    return seq(
+      $.expression,
+      'then',
+      $.Block,
+      repeat(
+        seq(
+          'elseif',
+          $.expression,
+          'then',
+          $.Block
+        )
+      )
+    )
+  },
+// [x] Switch          <== `switch` @expr `do`? @cases (`else` Block)? @`end`
+  Switch: $ => {
+    return seq(
+      'switch',
+      $.expression,
+      optional('do'),
+      $.cases,
+      optional(
+        seq(
+          'else', 
+          $.Block
+        )
+      ),
+      'end'
+    )
+  },
+// [x] cases           <-| (`case` @exprs @`then` Block)+
+  cases: $ => {
+    return repeat1(seq(
+      'case',
+      $.expression,
+      'then',
+      $.Block
+    ))
+  },
+// [x] for             <-- `for` (ForNum / ForIn)
+  for: $ => {
+    return seq(
+      'for',
+      choice($.ForNum, $.ForIn)
+    )
+  },
+// [x] ForNum          <== iddecl `=` @expr @`,` forcmp~? @expr (`,` @expr)~? @`do` Block @`end`
+  ForNum: $ => {
+    return seq(
+      $.iddecl,
+      '=',
+      $.expression,
+      ',',
+      optional($.forcmp),
+      $.expression,
+      optional(seq(',', $.expression)),
+      'do',
+      $.Block,
+      'end'
+    )
+  },
+// [x] ForIn           <== @iddecls @`in` @exprs @`do` Block @`end`
+  ForIn: $ => {
+    return seq(
+      $.iddecls,
+      'in',
+      $.expression,
+      'do',
+      $.Block,
+      'end'
+    )
+  },
+// [x] local           <-- `local` (localfunc / localvar)
+  local: $ => {
+    return seq('local', choice($.localfunc, $.localvar))
+  },
+
+// [x] global          <-- `global` (globalfunc / globalvar)
+  global: $ => {
+    return seq('global', choice($.globalfunc, $.globalvar))
+  },
+// [x] localfunc  : FuncDef  <== `function` $'local' @namedecl @funcbody
+  localfunc: $ => {
+    return seq('function', 'local', $.namedecl, $.funcbody)
+  },
+// [x] globalfunc : FuncDef  <== `function` $'global' @namedecl @funcbody
+  globalfunc: $ => {
+    return seq('function', 'global', $.namedecl, $.funcbody)
+  },
+// [x] FuncDef         <== `function` $false @funcname @funcbody
+  FuncDef: $ => {
+    return seq('function', $.funcname, $.funcbody)
+  },
+// [x] funcbody        <-- `(` funcargs @`)` (`:` @funcrets)~? annots~? Block @`end`
+  funcbody: $ => {
+    return seq('(', 
+      $.funcargs,
+      ')',
+      optional(seq(':', $.funcrets)),
+      optional($.annots),
+      $.Block,
+      'end'
+    )
+  },
+// [x] localvar   : VarDecl  <== $'local' @suffixeddecls (`=` @exprs)?
+  localvar: $ => {
+    return seq('local', $.suffixeddecls, optional(seq('=', listOf($.expression))))
+  },
+// [x] globalvar  : VarDecl  <== $'global' @suffixeddecls (`=` @exprs)?
+  globalvar: $ => {
+    return seq('global', $.suffixeddecls, optional(seq('=', listOf($.expression))))
+  },
+// [x] Assign          <== vars `=` @exprs
+  Assign: $ => {
+    return seq($.vars, '=', listOf($.expression))
+  },
+// [x] Preprocess      <== PREPROCESS SKIP
+  Preprocess: $ => {
+    return choice($.long_pp, $.short_pp)
   },
   // --------------
 
@@ -267,8 +430,6 @@ const rules = {
   */
   escape_sequence: _ => {
     const seqs = [
-
-- [ ] Add Pair
       /[trabvf\\]/,
       /x[0-9a-fA-F]{2}/,
       // e.g. u{09AF}
@@ -314,6 +475,32 @@ const rules = {
   IdDecls: $ => {
     return listOf($.IdDecl, ',')
   },
+  // iddecl          <-- IdDecl / PreprocessExpr
+  iddecl: $ => {
+    return choice($.IdDecl, $.pp_expr)
+  },
+  // iddecls         <-| iddecl (`,` @iddecl)*
+  iddecls: $ => {
+    return listOf($.iddecl)
+  },
+
+// [x] cmp             <-- `==`->'eq' / forcmp
+  cmp: $ => {
+    return choice('==', $.forcmp)
+  },
+// [x] forcmp          <-- `~=`->'ne' / `<=`->'le' / `<`->'lt' / `>=`->'ge' / `>`->'gt'
+  forcmp: $ => {
+    return choice(
+      '~=',
+      '<=',
+      '<',
+      '>=',
+      '>',
+    ) 
+  },
+// [ ] 
+ 
+// fieldsep        <-- `,` / `;`
   InitList: $ => {
     return seq(
       '{',
@@ -332,19 +519,16 @@ const rules = {
     return choice(
       seq('[', $.expression, ']', '=', $.expression),
       seq('name', '=', $.expression),
-      // TODO: I don't know what pair_sugar is supposed to do. I didn't see anything in the tests that wouldn't be captured by the first two choices.
+      seq('=', $.expression),
     )
   },
   fieldsep: _ => {
     return choice(',', ';')
   },
   Function: $ => {
-    return seq('function', $.FunctionBody)
+    return seq('function', $.funcbody)
   },
   // TODO: Make this work, gonna probably need initlist first
-  FunctionBody: $ => {
-    return 'funcbody'
-  },
 
    // <<-- END SIMPLE EXPRESSIONS -->>
 
@@ -361,12 +545,12 @@ const rules = {
      return choice(
        $.RecordType,
        $.UnionType,
-       // $.EnumType,
-       // $.FuncType,
-       // $.ArrayType,
-       // $.PointerType,
-       // $.VariantType, 
-       // seq($.typeexprprim, optional($typeopgen))
+       $.EnumType,
+       $.FuncType,
+       $.ArrayType,
+       $.PointerType,
+       $.VariantType, 
+       seq($.typeexprprim, optional($.typeopgen))
      )
    },
 
@@ -375,6 +559,24 @@ const rules = {
      return seq(repeat($.typeopunary), $.typeexprsimple)
    },
 
+   // typeopgen : GenericType   <== `(` @typeargs @`)` / &`{` {| InitList |}
+
+   // FIXME: this is an alias and probably doesn't need to exist in the type-sitter grammar
+   typeopvar: $ => {
+     return $.typevaris
+   },
+   typeopgen: $ => {
+     return choice(
+       seq(
+         '(',
+         $.typeargs,
+         ')'
+       ),
+       // the PEG for the second option looks complicated, but I believe for our purposes its the same as capturing an InitList
+       $.InitList
+       
+     )
+   },
    // [x] typevaris : VariantType   <== `|` @typeexpruary (`|` @typeexprunary)*
    typevaris: $ => {
      return repeat1(seq('|', $.typeexprunary)) 
@@ -388,11 +590,11 @@ const rules = {
    annots: $ => {
      return seq('<', listOf($.Annotation), '>')
    },
-   // name annotargs?
+   // [x] Annotation name annotargs?
    Annotation: $ => {
      return seq($.Name, optional($.annotargs))
    },
-   // annotargs       <-| `(` (expr (`,` @expr)*)? @`)` / InitList / String / PreprocessExpr
+   // [x] annotargs       <-| `(` (expr (`,` @expr)*)? @`)` / InitList / String / PreprocessExpr
    annotargs: $ => {
      return choice(
        seq('(', optional(listOf($.expression)), ')'),
@@ -401,7 +603,7 @@ const rules = {
        $.pp_expr,
      )
    },
-   // typeopunary     <-- typeopptr / typeopopt / typeoparr
+   // [x] typeopunary     <-- typeopptr / typeopopt / typeoparr
    typeopunary: $ => {
      return choice($.typeopptr, $.typeopopt, $.typeoparr)
    },
@@ -467,31 +669,95 @@ const rules = {
    EnumField: $ => {
      return seq($.name, optional(seq('=', $.expression)))
    },
-   // FuncType        <== 'function' WORDSKIP @`(` functypeargs @`)`(`:` @funcrets)?
+   // [x] FuncType        <== 'function' WORDSKIP @`(` functypeargs @`)`(`:` @funcrets)?
    FuncType: $ => {
      return seq(
        'function',
        '(',
+       optional($.functypeargs),
+       ')',
+       optional(
+         seq(
+           ':',
+           $.funcrets
+         )
+       )
     )
    },
-   // functypeargs    <-| (functypearg (`,` functypearg)* (`,` VarargsType)? / VarargsType)?
-   functypeargs: $ => {},
+   // [x] functypeargs    <-| (functypearg (`,` functypearg)* (`,` VarargsType)? / VarargsType)?
+   // this is only referenced in one place, it should likely be made transparent. I've moved
+   // the optional to the calling site rather than keeping it in the rule like the PEG has
+   functypeargs: $ => {
+     return choice(
+         seq( 
+           listOf($.functypearg),
+           optional(
+             seq(
+               ',',
+               $.VarargsType
+             )
+          )
+         ),
+         $.VarargsType
+       )
+   },
+   // [x] functypearg     <-- typeddecl / typeexpr
    functypearg: $ => {
      return choice($.typeddecl, $.typeexpr)
    },
-   // typeddecl    : IdDecl <== name `:` @typeexpr annots?
+   // [x] typeddecl    : IdDecl <== name `:` @typeexpr annots?
    typeddecl: $ => {
      return seq($.Name, ':', $.typeexpr, optional($.annots))
    },
-   // funcrets        <-| `(` typeexpr (`,` @typeexpr)* @`)` / typeexpr
-   funcrets: $ => {},
-   // [ ] ArrayType       <== 'array' WORDSKIP @`(` @typeexpr (`,` @expr)? @`)`
-   // ArrayType: $ => {},
-   // [ ] PointerType     <== 'pointer' WORDSKIP (`(` @typeexpr @`)`)?
-   // PointerType: $ => {},
-   // [ ] VariantType     <== 'variant' WORDSKIP `(` @typearg (`,` @typearg)* @`)`
-   // VariantType: $ => {},
-   // [ ] VarargsType     <== `...` (`:` @name)?
+   // [x] funcrets        <-| `(` typeexpr (`,` @typeexpr)* @`)` / typeexpr
+   funcrets: $ => {
+     return choice(
+       seq(
+         '(',
+         listOf($.typeexpr),
+         ')',
+       ),
+       $.typeexpr
+     )
+   },
+   // [x] ArrayType       <== 'array' WORDSKIP @`(` @typeexpr (`,` @expr)? @`)`
+   ArrayType: $ => {
+     return seq(
+       'array',
+       '(',
+       $.typeexpr,
+       optional(
+         seq(',', $.expression)
+       ),
+       ')'
+     )
+   },
+   // [x] PointerType     <== 'pointer' WORDSKIP (`(` @typeexpr @`)`)?
+   PointerType: $ => {
+     return seq(
+       'pointer',
+       optional(
+         seq(
+           '(',
+           $.typeexpr,
+           ')',
+         )
+       )
+     )
+   },
+   // [x] VariantType     <== 'variant' WORDSKIP `(` @typearg (`,` @typearg)* @`)`
+   VariantType: $ => {
+     return seq(
+       'variant',
+       '(',
+       listOf($.typearg),
+       ')',
+     )
+   },
+   // [x] VarargsType     <== `...` (`:` @name)?
+   VarargsType: $ => {
+     return seq('...', optional(seq(':', $.Name)))
+   },
    // <<-- END TYPES -->
 
 
