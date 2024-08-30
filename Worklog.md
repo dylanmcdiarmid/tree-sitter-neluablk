@@ -1,10 +1,21 @@
+### 8-29-2024
+Plan for today is to try and get Assign statements actually running after setting them up yesterday.
+
+- [x] add funcbody
+- [x] add funcargs
+- [x] add suffixeddecls
+
+There is a long dive of stuff to continue to fill in before we can call assign. I've also noticed today that I was a bit haphazard at the start of this project with tweaking the names a bit, and I'm wishing I had primarily focused on sticking to the PEG names for this phase, even if we rename them later (which we will).
+
+Short work session today.
+
 ### 8-28-2024
 Confirmed from Discord and a bit of experimentation that the last pair choice is simply `seq('=', $.Id)`. The pair_sugar in the PEG is there to make `a = { = b }` and `a = { b = b }` return the same ast (and a reminder you can run `nelua --print-ast example_whatever.nelua` to see the AST from the PEG parser).
 
 - [x] Finish first pass at type expressions and everything related
 - [x] Find and implement variable assignment, and then attempt to get everything running. This should allow us to do test passes on each type declaration.
   - In the PEG, variable assignment starts at the Assign rule 
-  - [ ] Assign is part of the Statements section, which we've already started, so let's continue that for now
+  - [x] Assign is part of the Statements section, which we've already started, so let's continue that for now
     - ForNum seems a bit weird, I'm not quite sure how to read the ~? syntax, optional capture. I think it's used to fill a node with a nil value if its not found. We'll need to do some extra testing in this area though.
 
 At the end of this work session, I've got a first pass completed for everything in the Statement section. I think I'm missing `suffixeddecls`, but most dependency rules I was able to implement.

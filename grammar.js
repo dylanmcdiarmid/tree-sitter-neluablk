@@ -233,11 +233,11 @@ const rules = {
   },
 // [x] localfunc  : FuncDef  <== `function` $'local' @namedecl @funcbody
   localfunc: $ => {
-    return seq('function', 'local', $.namedecl, $.funcbody)
+    return seq('function', 'local', $.Name, $.funcbody)
   },
 // [x] globalfunc : FuncDef  <== `function` $'global' @namedecl @funcbody
   globalfunc: $ => {
-    return seq('function', 'global', $.namedecl, $.funcbody)
+    return seq('function', 'global', $.Name, $.funcbody)
   },
 // [x] FuncDef         <== `function` $false @funcname @funcbody
   FuncDef: $ => {
@@ -253,6 +253,56 @@ const rules = {
       $.Block,
       'end'
     )
+  },
+// [x] funcname        <-- (id DotIndex* ColonIndex?)~>rfoldright
+  funcname: $ => {
+    return seq($.Id, repeat($.DotIndex), optional($.ColonIndex))
+  },
+  // [x] funcargs        <-| (iddecl (`,` iddecl)* (`,` VarargsType)? / VarargsType)?
+  // n.b. pulling optional out of this and adding it to the referer
+  funcargs: $ => {
+    return choice(
+      seq(
+        listOf($.iddecl),
+        optional(
+          seq(
+            ',',
+            $.VarargsType
+          )
+        )
+      ),
+      $.VarargsType
+    )
+  },
+// [x] suffixeddecls   <-| suffixeddeclexpr (`,` @suffixeddeclexpr)*
+  suffixeddecls: $ => {
+    return listOf($.suffixeddeclexpr)
+  },
+  // [x] suffixeddeclexpr  <-- suffixeddecl / PreprocessExpr
+  suffixeddeclexpr: $ => {
+    return choice($.suffixeddecl, $.pp_expr)
+  },
+  // [x] suffixeddecl : IdDecl <== (idsuffixed / name) (`:` @typeexpr)~? annots?
+  suffixeddecl: $ => {
+    return seq(
+      choice($.idsuffixed, $.name),
+      optional(
+        seq(
+          ':',
+          $.typeexpr
+        )
+      ),
+      optional($.annots)
+    )
+  },
+  // [x] idsuffixed      <-- (id DotIndex+)~>rfoldright
+  idsuffixed: $ => {
+    return seq($.id, repeat1($.DotIndex))
+  },
+  // [x] name            <-- NAME SKIP / PreprocessName
+  // FIXME: confusing name, has case variations
+  name: $ => {
+    return choice($.Name, $.pp_name)
   },
 // [x] localvar   : VarDecl  <== $'local' @suffixeddecls (`=` @exprs)?
   localvar: $ => {
@@ -453,6 +503,45 @@ const rules = {
   Id: $ => {
     return $.Name
   },
+  // FIXME: remove case variations
+  id: $ => {
+    return choice($.Id, $.pp_expr)
+  },
+  // [ ] var             <-- (exprprim (indexsuffix / callsuffix+ indexsuffix)+)~>rfoldright / id / deref
+  var: $ => {
+    return seq(
+      $.exprprim
+    )
+  },
+  // [x] exprprim        <-- ppcallprim / id / DoExpr / Paren
+  exprprim: $ => {
+    return choice(
+      $.ppcallprim,
+      $.id,
+      $.DoExpr,
+      $.Paren
+    )
+  },
+  // ppcallprim : PreprocessExpr <== {NAME->0} `!` &callsuffix
+  // TODO: Verify this is correct, run a --print-ast to confirm what we're getting from nelua
+  ppcallprim: $ => {
+    return seq(
+      $.Name,
+      '!',
+      $.callsuffix
+    )
+  },
+  // [x] callsuffix      <-- Call / CallMethod
+  callsuffix: $ => {
+    return choice($.Call, $.CallMethod)
+  },
+
+  // [ ] exprprim        <-- ppcallprim / id / DoExpr / Paren
+  ppcallprim: $ => {
+  },
+  vars: $ => {
+    return listOf($.var)
+  },
   // PEG: idsuffixed
   IdSuffixed: $ => {
     return seq($.Id, repeat1(seq('.', $.Name)))
@@ -476,6 +565,8 @@ const rules = {
     return listOf($.IdDecl, ',')
   },
   // iddecl          <-- IdDecl / PreprocessExpr
+  // It's a bit weird to have this named the same as other things with matching case.
+  // FIXME: Find better naming for this during the cleanup phase 
   iddecl: $ => {
     return choice($.IdDecl, $.pp_expr)
   },
