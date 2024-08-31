@@ -19,6 +19,44 @@
     }
   },
   {
+    "type": "ArrayType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Assign",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "vars",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "Block",
     "named": true,
     "fields": {},
@@ -26,6 +64,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "Assign",
+          "named": true
+        },
         {
           "type": "Label",
           "named": true
@@ -35,19 +77,11 @@
           "named": true
         },
         {
-          "type": "expression",
-          "named": true
-        },
-        {
           "type": "long_pp",
           "named": true
         },
         {
           "type": "short_pp",
-          "named": true
-        },
-        {
-          "type": "string_block",
           "named": true
         }
       ]
@@ -59,6 +93,40 @@
     "fields": {}
   },
   {
+    "type": "Call",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "callargs",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "CallMethod",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "callargs",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "ColonIndex",
     "named": true,
     "fields": {},
@@ -68,6 +136,21 @@
       "types": [
         {
           "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "DoExpr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Block",
           "named": true
         }
       ]
@@ -89,6 +172,117 @@
     }
   },
   {
+    "type": "EnumField",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EnumType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "EnumField",
+          "named": true
+        },
+        {
+          "type": "fieldsep",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ForIn",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "iddecls",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ForNum",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "forcmp",
+          "named": true
+        },
+        {
+          "type": "iddecl",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FuncType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "funcrets",
+          "named": true
+        },
+        {
+          "type": "functypeargs",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "Function",
     "named": true,
     "fields": {},
@@ -97,7 +291,7 @@
       "required": true,
       "types": [
         {
-          "type": "FunctionBody",
+          "type": "funcbody",
           "named": true
         }
       ]
@@ -176,6 +370,21 @@
     }
   },
   {
+    "type": "KeyIndex",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "Label",
     "named": true,
     "fields": {},
@@ -242,6 +451,36 @@
     }
   },
   {
+    "type": "Paren",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "PointerType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "RecordField",
     "named": true,
     "fields": {},
@@ -292,7 +531,26 @@
           "named": true
         },
         {
+          "type": "string_block",
+          "named": true
+        },
+        {
           "type": "string_fragment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "typeexpr",
           "named": true
         }
       ]
@@ -337,6 +595,41 @@
     }
   },
   {
+    "type": "Varargs",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "VarargsType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "VariantType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typearg",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "annotargs",
     "named": true,
     "fields": {},
@@ -358,6 +651,21 @@
         },
         {
           "type": "pp_expr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "annots",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Annotation",
           "named": true
         }
       ]
@@ -409,6 +717,67 @@
     }
   },
   {
+    "type": "callargs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "InitList",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "callsuffix",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Call",
+          "named": true
+        },
+        {
+          "type": "CallMethod",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cases",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "comment",
     "named": true,
     "fields": {},
@@ -433,6 +802,21 @@
     "fields": {}
   },
   {
+    "type": "deref",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "exprunary",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "expression",
     "named": true,
     "fields": {},
@@ -450,6 +834,141 @@
         },
         {
           "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "exprpow",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "exprsimple",
+          "named": true
+        },
+        {
+          "type": "oppow",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "exprprim",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "DoExpr",
+          "named": true
+        },
+        {
+          "type": "Paren",
+          "named": true
+        },
+        {
+          "type": "id",
+          "named": true
+        },
+        {
+          "type": "ppcallprim",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "exprsimple",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Boolean",
+          "named": true
+        },
+        {
+          "type": "InitList",
+          "named": true
+        },
+        {
+          "type": "Nil",
+          "named": true
+        },
+        {
+          "type": "Nilptr",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        },
+        {
+          "type": "Varargs",
+          "named": true
+        },
+        {
+          "type": "exprsuffixed",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "exprsuffixed",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "callsuffix",
+          "named": true
+        },
+        {
+          "type": "exprprim",
+          "named": true
+        },
+        {
+          "type": "indexsuffix",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "exprunary",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "exprpow",
+          "named": true
+        },
+        {
+          "type": "opunary",
           "named": true
         }
       ]
@@ -480,9 +999,322 @@
     "fields": {}
   },
   {
+    "type": "forcmp",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "funcargs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "VarargsType",
+          "named": true
+        },
+        {
+          "type": "iddecl",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "funcbody",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "annots",
+          "named": true
+        },
+        {
+          "type": "funcargs",
+          "named": true
+        },
+        {
+          "type": "funcrets",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "funcname",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ColonIndex",
+          "named": true
+        },
+        {
+          "type": "DotIndex",
+          "named": true
+        },
+        {
+          "type": "Id",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "funcrets",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "functypearg",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "typeddecl",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "functypeargs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "VarargsType",
+          "named": true
+        },
+        {
+          "type": "functypearg",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "globalfunc",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "funcbody",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "globalvar",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "suffixeddecls",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "hex_number",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "id",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "pp_expr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "iddecl",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "IdDecl",
+          "named": true
+        },
+        {
+          "type": "pp_expr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "iddecls",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "iddecl",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "idsuffixed",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "DotIndex",
+          "named": true
+        },
+        {
+          "type": "id",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ifs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "indexsuffix",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "DotIndex",
+          "named": true
+        },
+        {
+          "type": "KeyIndex",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "localfunc",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "funcbody",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "localvar",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "suffixeddecls",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "long_comment",
@@ -531,14 +1363,87 @@
     }
   },
   {
+    "type": "name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "pp_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "number_type_decl",
     "named": true,
     "fields": {}
   },
   {
+    "type": "oppow",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "exprunary",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "opunary",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "exprunary",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "pp_expr",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "pp_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "ppcallprim",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "callsuffix",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "short_comment",
@@ -647,6 +1552,124 @@
     }
   },
   {
+    "type": "suffixeddecl",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "annots",
+          "named": true
+        },
+        {
+          "type": "idsuffixed",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "suffixeddeclexpr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "pp_expr",
+          "named": true
+        },
+        {
+          "type": "suffixeddecl",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "suffixeddecls",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "suffixeddeclexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typearg",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeargs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typearg",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeddecl",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "annots",
+          "named": true
+        },
+        {
+          "type": "typeexpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "typeexpr",
     "named": true,
     "fields": {},
@@ -666,7 +1689,7 @@
     }
   },
   {
-    "type": "typeexprsimple",
+    "type": "typeexprprim",
     "named": true,
     "fields": {},
     "children": {
@@ -674,11 +1697,58 @@
       "required": true,
       "types": [
         {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "IdSuffixed",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeexprsimple",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ArrayType",
+          "named": true
+        },
+        {
+          "type": "EnumType",
+          "named": true
+        },
+        {
+          "type": "FuncType",
+          "named": true
+        },
+        {
+          "type": "PointerType",
+          "named": true
+        },
+        {
           "type": "RecordType",
           "named": true
         },
         {
           "type": "UnionType",
+          "named": true
+        },
+        {
+          "type": "VariantType",
+          "named": true
+        },
+        {
+          "type": "typeexprprim",
+          "named": true
+        },
+        {
+          "type": "typeopgen",
           "named": true
         }
       ]
@@ -713,6 +1783,25 @@
       "types": [
         {
           "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typeopgen",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "InitList",
+          "named": true
+        },
+        {
+          "type": "typeargs",
           "named": true
         }
       ]
@@ -803,6 +1892,56 @@
     }
   },
   {
+    "type": "var",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "callsuffix",
+          "named": true
+        },
+        {
+          "type": "deref",
+          "named": true
+        },
+        {
+          "type": "exprprim",
+          "named": true
+        },
+        {
+          "type": "id",
+          "named": true
+        },
+        {
+          "type": "indexsuffix",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "vars",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "var",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
     "type": "\"",
     "named": false
   },
@@ -855,6 +1994,10 @@
     "named": false
   },
   {
+    "type": "...",
+    "named": false
+  },
+  {
     "type": ":",
     "named": false
   },
@@ -871,7 +2014,15 @@
     "named": false
   },
   {
+    "type": "<=",
+    "named": false
+  },
+  {
     "type": "=",
+    "named": false
+  },
+  {
+    "type": "==",
     "named": false
   },
   {
@@ -879,8 +2030,8 @@
     "named": false
   },
   {
-    "type": "FunctionBody",
-    "named": true
+    "type": ">=",
+    "named": false
   },
   {
     "type": "Nil",
@@ -888,10 +2039,6 @@
   },
   {
     "type": "Nilptr",
-    "named": true
-  },
-  {
-    "type": "Varargs",
     "named": true
   },
   {
@@ -903,11 +2050,19 @@
     "named": false
   },
   {
+    "type": "^",
+    "named": false
+  },
+  {
     "type": "_",
     "named": false
   },
   {
     "type": "and",
+    "named": false
+  },
+  {
+    "type": "array",
     "named": false
   },
   {
@@ -920,6 +2075,34 @@
   },
   {
     "type": "byte",
+    "named": false
+  },
+  {
+    "type": "case",
+    "named": false
+  },
+  {
+    "type": "defer",
+    "named": false
+  },
+  {
+    "type": "do",
+    "named": false
+  },
+  {
+    "type": "else",
+    "named": false
+  },
+  {
+    "type": "elseif",
+    "named": false
+  },
+  {
+    "type": "end",
+    "named": false
+  },
+  {
+    "type": "enum",
     "named": false
   },
   {
@@ -959,7 +2142,19 @@
     "named": false
   },
   {
+    "type": "for",
+    "named": false
+  },
+  {
     "type": "function",
+    "named": false
+  },
+  {
+    "type": "global",
+    "named": false
+  },
+  {
+    "type": "goto",
     "named": false
   },
   {
@@ -988,6 +2183,14 @@
   },
   {
     "type": "i8",
+    "named": false
+  },
+  {
+    "type": "ifs",
+    "named": false
+  },
+  {
+    "type": "in",
     "named": false
   },
   {
@@ -1020,6 +2223,10 @@
   },
   {
     "type": "isize",
+    "named": false
+  },
+  {
+    "type": "local",
     "named": false
   },
   {
@@ -1067,7 +2274,15 @@
     "named": false
   },
   {
+    "type": "pointer",
+    "named": false
+  },
+  {
     "type": "record",
+    "named": false
+  },
+  {
+    "type": "repeat",
     "named": false
   },
   {
@@ -1089,6 +2304,14 @@
   {
     "type": "string_fragment",
     "named": true
+  },
+  {
+    "type": "switch",
+    "named": false
+  },
+  {
+    "type": "then",
+    "named": false
   },
   {
     "type": "true",
@@ -1155,11 +2378,23 @@
     "named": false
   },
   {
+    "type": "until",
+    "named": false
+  },
+  {
     "type": "us",
     "named": false
   },
   {
     "type": "usize",
+    "named": false
+  },
+  {
+    "type": "variant",
+    "named": false
+  },
+  {
+    "type": "while",
     "named": false
   },
   {
@@ -1176,6 +2411,10 @@
   },
   {
     "type": "~",
+    "named": false
+  },
+  {
+    "type": "~=",
     "named": false
   }
 ]

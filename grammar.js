@@ -94,10 +94,10 @@ const rules = {
   Block: $ => {
     return choice(
       $.Label, // remove? 
-      $.expression, // remove? 
+      // $.expression, // remove? 
       $.Assign,
       $.comment, 
-      $.string_block, 
+      // $.string_block, 
       $.short_pp, 
       $.long_pp,
     )
@@ -282,6 +282,16 @@ const rules = {
   suffixeddeclexpr: $ => {
     return choice($.suffixeddecl, $.pp_expr)
   },
+  // [x] exprsuffixed    <-- (exprprim (indexsuffix / callsuffix)*)~>rfoldright
+  exprsuffixed: $ => {
+    return prec.right(seq(
+      $.exprprim,
+      repeat(choice(
+        $.indexsuffix,
+        $.callsuffix,
+      )),
+    ))
+  },
   // [x] suffixeddecl : IdDecl <== (idsuffixed / name) (`:` @typeexpr)~? annots?
   suffixeddecl: $ => {
     return seq(
@@ -459,6 +469,7 @@ const rules = {
       '\'',
     )
     return choice(
+      $.string_block,
       doubleQuote,
       singleQuote
     )
@@ -505,13 +516,75 @@ const rules = {
   },
   // FIXME: remove case variations
   id: $ => {
-    return choice($.Id, $.pp_expr)
+    return prec.left(choice($.Id, $.pp_expr))
   },
-  // [ ] var             <-- (exprprim (indexsuffix / callsuffix+ indexsuffix)+)~>rfoldright / id / deref
+  // [x] var             <-- (exprprim (indexsuffix / callsuffix+ indexsuffix)+)~>rfoldright / id / deref
   var: $ => {
-    return seq(
-      $.exprprim
+    // FIXME precedence
+    return choice(
+      seq(
+        $.exprprim,
+        prec.right(2, choice(
+          $.indexsuffix,
+          repeat1(
+            seq(
+              repeat1($.callsuffix),
+              $.indexsuffix
+            )
+          )
+        ))
+      ),
+      $.id, 
+      $.deref
     )
+  },
+  // [x] deref     : UnaryOp   <== `$`->'deref' @exprunary
+  deref: $ => {
+    return seq('$', $.exprunary)
+  },
+  // [x] exprunary       <-- opunary / exprpow
+  exprunary: $ => {
+    return choice($.opunary, $.exprpow)
+  },
+  // [x] (`not`->'not' / `-`->'unm' / `#`->'len' / `~`->'bnot' / `&`->'ref' / `$`->'deref') @exprunary
+  opunary: $ => {
+    return seq(
+      choice('not', '-', '#', '~', '&', '$'), 
+      $.exprunary
+    )
+  },
+  // [x] exprpow         <-- (exprsimple oppow*)~>foldleft
+  exprpow: $ => {
+    return prec.left(seq(
+      $.exprsimple,
+      repeat($.oppow)
+    ))
+  },
+  // [] exprsimple      <-- Number / String / Type / InitList / Boolean / Function / Nilptr / Nil / Varargs / exprsuffixed
+  exprsimple: $ => {
+    return choice(
+      $.Number,
+      $.String,
+      $.Type,
+      $.InitList,
+      $.Boolean,
+      $.Nilptr,
+      $.Nil,
+      $.Varargs,
+      $.exprsuffixed
+    )
+  }, 
+  // [] Type
+  Type: $ => {
+    return $.typeexpr
+  },
+  // oppow     : BinaryOp  <== `^`->'pow' @exprunary
+  oppow: $ => {
+    return seq('^', $.exprunary)
+  },
+  // [x] indexsuffix     <-- DotIndex / KeyIndex
+  indexsuffix: $ => {
+    return choice($.DotIndex, $.KeyIndex)
   },
   // [x] exprprim        <-- ppcallprim / id / DoExpr / Paren
   exprprim: $ => {
@@ -522,6 +595,37 @@ const rules = {
       $.Paren
     )
   },
+  // [x] DoExpr          <== `(` `do` Block @`end` @`)`
+  DoExpr: $ => {
+    return seq(
+      '(',
+      'do',
+      $.Block,
+      'end',
+      ')'
+    )
+  },
+  // [x] Paren           <== `(` @expr @`)`
+  Paren: $ => {
+    return seq(
+      '(',
+      $.expression,
+      ')'
+    )
+  },
+  // [x] Call            <== callargs
+  Call: $ => {
+    return $.callargs
+  },
+  // [x] CallMethod      <== `:` @name @callargs
+  CallMethod: $ => {
+    return seq(
+      ':', 
+      $.Name, 
+      $.callargs
+    )
+  },
+
   // ppcallprim : PreprocessExpr <== {NAME->0} `!` &callsuffix
   // TODO: Verify this is correct, run a --print-ast to confirm what we're getting from nelua
   ppcallprim: $ => {
@@ -534,10 +638,6 @@ const rules = {
   // [x] callsuffix      <-- Call / CallMethod
   callsuffix: $ => {
     return choice($.Call, $.CallMethod)
-  },
-
-  // [ ] exprprim        <-- ppcallprim / id / DoExpr / Paren
-  ppcallprim: $ => {
   },
   vars: $ => {
     return listOf($.var)
@@ -558,21 +658,37 @@ const rules = {
   ColonIndex: $ => {
     return seq(':', $.Name)
   },
+  // KeyIndex        <== `[` @expr @`]`
+  KeyIndex: $ => {
+    return seq('[', $.expression, ']')
+  },
   IdDecl: $ => {
     return seq($.Id, optional($.typeexpr))
   },
   IdDecls: $ => {
     return listOf($.IdDecl, ',')
   },
-  // iddecl          <-- IdDecl / PreprocessExpr
+  // [x] iddecl          <-- IdDecl / PreprocessExpr
   // It's a bit weird to have this named the same as other things with matching case.
   // FIXME: Find better naming for this during the cleanup phase 
   iddecl: $ => {
     return choice($.IdDecl, $.pp_expr)
   },
-  // iddecls         <-| iddecl (`,` @iddecl)*
+  // [x] iddecls         <-| iddecl (`,` @iddecl)*
   iddecls: $ => {
     return listOf($.iddecl)
+  },
+  // [x] callargs        <-| `(` (expr (`,` @expr)*)? @`)` / InitList / String
+  callargs: $ => {
+    return choice(
+      seq(
+        '(',
+        optional(listOf($.expression)),
+        ')'
+      ),
+      $.InitList,
+      $.String
+    )
   },
 
 // [x] cmp             <-- `==`->'eq' / forcmp
@@ -625,15 +741,16 @@ const rules = {
 
    // <<-- TYPE EXPRESSIONS -->>
    typeexpr: $ => {
-     return seq(
+     // FIXME Need to understand prec rule for this case
+     return prec.left(2, seq(
        $.typeexprunary, 
        optional($.typevaris),
-     )
+     ))
    },
    // [ ] typexprsimple   <-- RecordType / UnionType / EnumType / FuncType / ArrayType / PointerType /
    //                     VariantType / (typeexprprim typeopgen?)~>foldleft
    typeexprsimple: $ => {
-     return choice(
+     return prec.left(choice(
        $.RecordType,
        $.UnionType,
        $.EnumType,
@@ -642,7 +759,7 @@ const rules = {
        $.PointerType,
        $.VariantType, 
        seq($.typeexprprim, optional($.typeopgen))
-     )
+     ))
    },
 
    // typeexprunary   <-- (typeopunary* typexprsimple)->rfoldleft
@@ -670,12 +787,13 @@ const rules = {
    },
    // [x] typevaris : VariantType   <== `|` @typeexpruary (`|` @typeexprunary)*
    typevaris: $ => {
-     return repeat1(seq('|', $.typeexprunary)) 
+     // FIXME precedence
+     return prec.left(2, repeat1(seq('|', $.typeexprunary)))
    },
 
    // [x] typeexprprim    <-- idsuffixed / id
    typeexprprim: $ => {
-     return choice($.Id, $.IdSuffixed)
+     return prec.left(3, choice($.Id, $.IdSuffixed))
    },
    // [x] annots          <-| `<` @Annotation (`,` @Annotation)* @`>`
    annots: $ => {
@@ -712,7 +830,7 @@ const rules = {
      return seq(
        'record', 
        '{', 
-       repeat(
+       optional(
          seq(
            listOf($.RecordField, $.fieldsep),
            optional($.fieldsep)
@@ -729,7 +847,7 @@ const rules = {
      return seq(
        'union',
        '{',
-       repeat(
+       optional(
          seq(
            listOf($.UnionField, $.fieldsep),
            optional($.fieldsep)
@@ -779,7 +897,8 @@ const rules = {
    // this is only referenced in one place, it should likely be made transparent. I've moved
    // the optional to the calling site rather than keeping it in the rule like the PEG has
    functypeargs: $ => {
-     return choice(
+     // FIXME precedence
+     return prec.left(3, choice(
          seq( 
            listOf($.functypearg),
            optional(
@@ -790,8 +909,25 @@ const rules = {
           )
          ),
          $.VarargsType
-       )
+       ))
    },
+   // [x] typeargs        <-| typearg (`,` @typearg)*
+   typeargs: $ => {
+     return listOf($.typearg)
+   },
+   // [ ] typearg         <-- typeexpr / `(` expr @`)` / expr
+   typearg: $ => {
+     return choice(
+       $.typeexpr,
+       seq(
+         '(',
+         $.expression,
+         ')'
+       ),
+       $.expression
+     )
+   },
+   
    // [x] functypearg     <-- typeddecl / typeexpr
    functypearg: $ => {
      return choice($.typeddecl, $.typeexpr)
@@ -825,7 +961,8 @@ const rules = {
    },
    // [x] PointerType     <== 'pointer' WORDSKIP (`(` @typeexpr @`)`)?
    PointerType: $ => {
-     return seq(
+     // FIXME: Don't fully understand this case for precedence. I think we want to express that if the optional sequence exists, we want it associated with the pointer, rather than something else, but I need to write an actual test case.
+     return prec.left(seq(
        'pointer',
        optional(
          seq(
@@ -833,6 +970,7 @@ const rules = {
            $.typeexpr,
            ')',
          )
+       )
        )
      )
    },

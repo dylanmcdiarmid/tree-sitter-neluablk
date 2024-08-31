@@ -1,3 +1,35 @@
+### 8-30-2024
+Continue work on getting the Assign rule fully ported.
+
+After finishing up filling in the missing symbols, I ran into an conflict problem with PointerType. I looked at Komo's version, but his doesn't support the ( typeexpr ) sequence being optional, which is how I'm reading the PEG.
+
+```
+Unresolved conflict for symbol sequence:
+
+  'function'  '('  funcargs  ')'  ':'  'pointer'  •  '('  …
+
+Possible interpretations:
+
+  1:  'function'  '('  funcargs  ')'  ':'  (PointerType  'pointer'  •  '('  typeexpr  ')')
+  2:  'function'  '('  funcargs  ')'  ':'  (PointerType  'pointer')  •  '('  …
+```
+
+For now I'll fill in prec.left with a FIXME once I understand a bit better exactly what cases trigger this conflict.
+
+I hit a ton of cases of weird precedence, and I think we'll just need to wait until I create test cases for all the different type expressions to make sure they are resolving correctly. Hitting like 10 precedence problems in a row makes me question the wisdom of filling in lots of rules at once, but this may be a case where the grass will always be greener.
+
+Hypothetically, we should be able to start running down Assign rule cases now, so that's up next.
+
+In practice we're still missing a bunch of rules. `var` was actually unfinished so filling in more here, but making sure to actually run the code more often to avoid a long chain of errors.
+
+We've filled in a bunch more rules, but Assign is still failing to parse `a = b` properly. Now we need to walk through why this might be.
+
+`nelua --print-ast example_assign.neluablk` gives us the equivalent of `Assign((Id "a"), (Id "b"))`
+Obviously the PEG gives way fewer nodes than our wip version of tree-sitter does, but lets figure out what is failing to capture
+
+For next work session, we need to finish filling out the "expression" rule (expr in the PEG). That's where Assign is currently breaking.
+ 
+
 ### 8-29-2024
 Plan for today is to try and get Assign statements actually running after setting them up yesterday.
 
