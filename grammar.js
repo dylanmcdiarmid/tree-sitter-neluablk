@@ -7,30 +7,28 @@
 */
 const name = 'neluablk'
 
-// taken from tree-sitter-c
-const PREC = {
-  PAREN_DECLARATOR: -10,
-  ASSIGNMENT: -2,
-  CONDITIONAL: -1,
-  DEFAULT: 0,
-  LOGICAL_OR: 1,
-  LOGICAL_AND: 2,
-  INCLUSIVE_OR: 3,
-  EXCLUSIVE_OR: 4,
-  BITWISE_AND: 5,
-  EQUAL: 6,
-  RELATIONAL: 7,
-  OFFSETOF: 8,
-  SHIFT: 9,
-  ADD: 10,
-  MULTIPLY: 11,
-  CAST: 12,
-  SIZEOF: 13,
-  UNARY: 14,
-  CALL: 15,
-  FIELD: 16,
-  SUBSCRIPT: 17,
+// precedence for binary expressions
+const BINPREC = {
+  OR: 1,
+  AND: 2,
+  CMP: 3,
+  BITOR: 4,
+  BITXOR: 5,
+  BITAND: 6,
+  BITSHIFT: 7,
+  CONCAT: 8,
+  ARITHMETIC: 9,
+  FACT: 10,
 }
+
+const EXPRPREC = {
+  BINARY: 1,
+  UNARY: 2,
+  // FIXME: I don't know if TYPE vs ID actually is a thing.
+  TYPE: 3,
+  ID: 4,
+}
+
 
 const numberTypeEndings = [
   'i', 'integer',
@@ -284,7 +282,7 @@ const rules = {
   },
   // [x] exprsuffixed    <-- (exprprim (indexsuffix / callsuffix)*)~>rfoldright
   exprsuffixed: $ => {
-    return prec.right(seq(
+    return prec.left(EXPRPREC.ID, seq(
       $.exprprim,
       repeat(choice(
         $.indexsuffix,
@@ -324,7 +322,7 @@ const rules = {
   },
 // [x] Assign          <== vars `=` @exprs
   Assign: $ => {
-    return seq($.vars, '=', listOf($.expression))
+    return seq(field('left', $.vars), '=', field('right', listOf($.expression)))
   },
 // [x] Preprocess      <== PREPROCESS SKIP
   Preprocess: $ => {
@@ -340,7 +338,7 @@ const rules = {
       $.binary_expression,
       $.unary_expression,
       // PEG: exprsimple
-      $.simple_expression,
+      $.exprsimple,
       // just used for testing
       // $._temporary_expression
       // $.simple_expression,
@@ -356,9 +354,31 @@ const rules = {
   binary_expression: $ => {
     const ops = [
         // opor
-        ['or', PREC.LOGICAL_OR],
+        ['or', BINPREC.OR],
         // opand
-        ['and', PREC.LOGICAL_AND],
+        ['and', BINPREC.AND],
+        ['==', BINPREC.CMP],
+        ['~=', BINPREC.CMP],
+        ['<=', BINPREC.CMP],
+        ['<', BINPREC.CMP],
+        ['>=', BINPREC.CMP],
+        ['>=', BINPREC.CMP],
+        ['>', BINPREC.CMP],
+        ['|', BINPREC.BITOR],
+        ['~', BINPREC.BITXOR],
+        ['&', BINPREC.BITAND],
+        ['<<', BINPREC.BITSHIFT],
+        ['>>>', BINPREC.BITSHIFT],
+        ['>>', BINPREC.BITSHIFT],
+        ['..', BINPREC.CONCAT],
+        ['+', BINPREC.ARITHMETIC],
+        ['-', BINPREC.ARITHMETIC],
+        ['*', BINPREC.FACT],
+        ['///', BINPREC.FACT],
+        ['//', BINPREC.FACT],
+        ['/', BINPREC.FACT],
+        ['%%%', BINPREC.FACT],
+        ['%', BINPREC.FACT],
       ]
     const choices = ops
       .map(([operator, precedence]) => {
@@ -370,23 +390,16 @@ const rules = {
           )
         )
       })
-    return choice(...choices)
+    return prec.left(EXPRPREC.BINARY, choice(...choices))
   },
 
   unary_expression: $ => {
-    return prec.left(PREC.UNARY, seq(
+    return prec.left(EXPRPREC.UNARY, seq(
         field('operator', choice('not', '-', '#', '~', '&', '$')),
         field('argument', $.expression),
       )
     )
   },
-
-  simple_expression: $ => {
-    // TODO Add each simple expression
-    return choice($.Number, $.String, $.Boolean, $.Nilptr, $.Nil, $.Varargs, $.InitList, $.Function)
-  },
-
-   
   // -----------
   // <<-- START SIMPLE EXPRESSIONS -->>
   //exprsimple      <-- Number / String / Type / InitList / Boolean /
@@ -562,21 +575,22 @@ const rules = {
   },
   // [] exprsimple      <-- Number / String / Type / InitList / Boolean / Function / Nilptr / Nil / Varargs / exprsuffixed
   exprsimple: $ => {
-    return choice(
+    return prec(400, choice(
       $.Number,
       $.String,
       $.Type,
       $.InitList,
       $.Boolean,
+      $.Function,
       $.Nilptr,
       $.Nil,
       $.Varargs,
-      $.exprsuffixed
-    )
+      $.exprsuffixed,
+    ))
   }, 
-  // [] Type
+  // [x] Type
   Type: $ => {
-    return $.typeexpr
+    return prec(400, seq('@', $.typeexpr))
   },
   // oppow     : BinaryOp  <== `^`->'pow' @exprunary
   oppow: $ => {
@@ -742,9 +756,9 @@ const rules = {
    // <<-- TYPE EXPRESSIONS -->>
    typeexpr: $ => {
      // FIXME Need to understand prec rule for this case
-     return prec.left(2, seq(
+     return prec.left(400, seq(
        $.typeexprunary, 
-       optional($.typevaris),
+       field('variation', optional($.typevaris)),
      ))
    },
    // [ ] typexprsimple   <-- RecordType / UnionType / EnumType / FuncType / ArrayType / PointerType /
@@ -764,7 +778,7 @@ const rules = {
 
    // typeexprunary   <-- (typeopunary* typexprsimple)->rfoldleft
    typeexprunary: $ => {
-     return seq(repeat($.typeopunary), $.typeexprsimple)
+     return seq(repeat(field('unary', $.typeopunary)), field('type', $.typeexprsimple))
    },
 
    // typeopgen : GenericType   <== `(` @typeargs @`)` / &`{` {| InitList |}
@@ -788,7 +802,7 @@ const rules = {
    // [x] typevaris : VariantType   <== `|` @typeexpruary (`|` @typeexprunary)*
    typevaris: $ => {
      // FIXME precedence
-     return prec.left(2, repeat1(seq('|', $.typeexprunary)))
+     return prec.left(400, repeat1(seq('|', $.typeexprunary)))
    },
 
    // [x] typeexprprim    <-- idsuffixed / id
@@ -917,7 +931,7 @@ const rules = {
    },
    // [ ] typearg         <-- typeexpr / `(` expr @`)` / expr
    typearg: $ => {
-     return choice(
+     return prec.left(10, choice(
        $.typeexpr,
        seq(
          '(',
@@ -925,7 +939,7 @@ const rules = {
          ')'
        ),
        $.expression
-     )
+     ))
    },
    
    // [x] functypearg     <-- typeddecl / typeexpr
@@ -962,7 +976,7 @@ const rules = {
    // [x] PointerType     <== 'pointer' WORDSKIP (`(` @typeexpr @`)`)?
    PointerType: $ => {
      // FIXME: Don't fully understand this case for precedence. I think we want to express that if the optional sequence exists, we want it associated with the pointer, rather than something else, but I need to write an actual test case.
-     return prec.left(seq(
+     return prec.right(seq(
        'pointer',
        optional(
          seq(
@@ -971,8 +985,7 @@ const rules = {
            ')',
          )
        )
-       )
-     )
+     ))
    },
    // [x] VariantType     <== 'variant' WORDSKIP `(` @typearg (`,` @typearg)* @`)`
    VariantType: $ => {

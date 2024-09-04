@@ -1,3 +1,33 @@
+### 9-3-2024
+Trying to find my place after a long weekend without coding. Looks like we're filling in the `expression` rule (`expr` in the PEG). I'll be running generate more often during this worksession, as I ran into a lot of precedence resolution I didn't really understand last time.
+
+I've got the simple assign expression parsing without error, but right now it's reading a Type where it shouldn't.
+
+- [x] Fix `a = b` reading a Type
+  - This resulted from a bad translation of Type from the PEG, I missed that it was a sequence.
+
+**Smoke Tests**
+- [x] number assignment
+- [x] double quote string assignment
+- [x] single quote string assignment
+- [x] string block assignment
+- [x] type assignment
+- [x] unary type assignment
+  - [x] pointer
+  - [x] optional
+  - [x] array
+- [ ] type variations
+  - Right now it looks like bitwise or is taking precedence over type variation signifier.
+  
+The type variant case, simplified to a = @a | b, should help me understand precedence if I can untangle it. Nelua correctly parses it as assignment to a Variant Type, whereas we get a binary expression from tree-sitter.
+
+I added high precedence rules all the way down the chain, but I'm finding that I can only get them to kick in if I remove "optional" from typevaris. Komo's implementation errors in this case so I can't use that either.
+
+This may be a case where we just need to rebuild the type variations section with an eye towards LR parsing. Unfortunately, minimal case reproduction can be very difficult with type sitter, which can make posing a question like this to the tree-sitter discord annoying enough that I don't want to do it.
+
+Next working session: Try taking advantage of the discovery that removing "optional" from typevaris in the type expression makes the precedence work correctly. We can try a choice token perhaps, typeexprvaris vs typeexpr, rather than a single token with optional.
+
+
 ### 8-30-2024
 Continue work on getting the Assign rule fully ported.
 
