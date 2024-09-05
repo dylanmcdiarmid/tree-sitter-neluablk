@@ -27,6 +27,8 @@ const EXPRPREC = {
   // FIXME: I don't know if TYPE vs ID actually is a thing.
   TYPE: 3,
   ID: 4,
+  SIMPLE: 5,
+  CALLARGS: 6,
 }
 
 
@@ -282,12 +284,13 @@ const rules = {
   },
   // [x] exprsuffixed    <-- (exprprim (indexsuffix / callsuffix)*)~>rfoldright
   exprsuffixed: $ => {
-    return prec.left(EXPRPREC.ID, seq(
+    return prec.right(EXPRPREC.ID, seq(
       $.exprprim,
-      repeat(choice(
-        $.indexsuffix,
-        $.callsuffix,
-      )),
+      repeat(choice($.indexsuffix_callargs, $.indexsuffix))
+      // repeat(choice(
+      //   $.indexsuffix,
+      //   $.callsuffix,
+      // )),
     ))
   },
   // [x] suffixeddecl : IdDecl <== (idsuffixed / name) (`:` @typeexpr)~? annots?
@@ -352,53 +355,93 @@ const rules = {
   },
 
   binary_expression: $ => {
+    // const ops = [
+    //     // opor
+    //     ['or', BINPREC.OR],
+    //     // opand
+    //     ['and', BINPREC.AND],
+    //     ['==', BINPREC.CMP],
+    //     ['~=', BINPREC.CMP],
+    //     ['<=', BINPREC.CMP],
+    //     ['<', BINPREC.CMP],
+    //     ['>=', BINPREC.CMP],
+    //     ['>', BINPREC.CMP],
+    //     ['|', BINPREC.BITOR],
+    //     ['~', BINPREC.BITXOR],
+    //     ['&', BINPREC.BITAND],
+    //     ['<<', BINPREC.BITSHIFT],
+    //     ['>>>', BINPREC.BITSHIFT],
+    //     ['>>', BINPREC.BITSHIFT],
+    //     ['..', BINPREC.CONCAT],
+    //     ['+', BINPREC.ARITHMETIC],
+    //     ['-', BINPREC.ARITHMETIC],
+    //     ['*', BINPREC.FACT],
+    //     ['///', BINPREC.FACT],
+    //     ['//', BINPREC.FACT],
+    //     ['/', BINPREC.FACT],
+    //     ['%%%', BINPREC.FACT],
+    //     ['%', BINPREC.FACT],
+    //   ]
+    // const choices = ops
+    //   .map(([operator, precedence]) => {
+    //     return prec.left(precedence,
+    //       seq(
+    //         field('left', $.expression), 
+    //         field('operator', operator),
+    //         field('right', $.expression),
+    //       )
+    //     )
+    //   })
     const ops = [
-        // opor
-        ['or', BINPREC.OR],
-        // opand
-        ['and', BINPREC.AND],
-        ['==', BINPREC.CMP],
-        ['~=', BINPREC.CMP],
-        ['<=', BINPREC.CMP],
-        ['<', BINPREC.CMP],
-        ['>=', BINPREC.CMP],
-        ['>=', BINPREC.CMP],
-        ['>', BINPREC.CMP],
-        ['|', BINPREC.BITOR],
-        ['~', BINPREC.BITXOR],
-        ['&', BINPREC.BITAND],
-        ['<<', BINPREC.BITSHIFT],
-        ['>>>', BINPREC.BITSHIFT],
-        ['>>', BINPREC.BITSHIFT],
-        ['..', BINPREC.CONCAT],
-        ['+', BINPREC.ARITHMETIC],
-        ['-', BINPREC.ARITHMETIC],
-        ['*', BINPREC.FACT],
-        ['///', BINPREC.FACT],
-        ['//', BINPREC.FACT],
-        ['/', BINPREC.FACT],
-        ['%%%', BINPREC.FACT],
-        ['%', BINPREC.FACT],
-      ]
-    const choices = ops
-      .map(([operator, precedence]) => {
-        return prec.left(precedence,
-          seq(
-            field('left', $.expression), 
-            field('operator', operator),
-            field('right', $.expression),
-          )
-        )
-      })
-    return prec.left(EXPRPREC.BINARY, choice(...choices))
+      [BINPREC.OR, $.binop_or],
+      [BINPREC.AND, $.binop_and],
+      [BINPREC.CMP, $.binop_cmp],
+      [BINPREC.BITOR, $.binop_bitor],
+      [BINPREC.BITXOR, $.binop_bitxor],
+      [BINPREC.BITAND, $.binop_bitand],
+      [BINPREC.BITSHIFT, $.binop_bitshift],
+      [BINPREC.CONCAT, $.binop_concat],
+      [BINPREC.ARITHMETIC, $.binop_arithmetic],
+      [BINPREC.FACT, $.binop_fact],
+    ].map(([precedence, rule]) => {
+      return prec.left(precedence, seq(
+        field('left', $.expression),
+        field('op', rule),
+        field('right', $.expression),
+      ))
+    })
+    return prec.left(EXPRPREC.BINARY, choice( ...ops ))
+  },
+
+  binop_or: _ => 'or',
+  binop_and: _ => 'and',
+  binop_cmp: _ => {
+    return choice('==', '~=', '<=', '<', '>=', '>')
+  },
+  binop_bitor: _ => '|',
+  binop_bitxor: _ => '~',
+  binop_bitand: _ => '&',
+  binop_bitshift: _ => {
+    return choice('<<', '>>>', '>>')
+  },
+  binop_concat: _ => '..',
+  binop_arithmetic: _ => {
+    return choice('+', '-')
+  },
+  binop_fact: _ => {
+    return choice('*', '///', '//', '/', '%%%', '%')
   },
 
   unary_expression: $ => {
     return prec.left(EXPRPREC.UNARY, seq(
-        field('operator', choice('not', '-', '#', '~', '&', '$')),
+        field('operator', $.unary_op),
         field('argument', $.expression),
       )
     )
+  },
+
+  unary_op: _ => {
+    return choice('not', '-', '#', '~', '&', '$')
   },
   // -----------
   // <<-- START SIMPLE EXPRESSIONS -->>
@@ -575,7 +618,7 @@ const rules = {
   },
   // [] exprsimple      <-- Number / String / Type / InitList / Boolean / Function / Nilptr / Nil / Varargs / exprsuffixed
   exprsimple: $ => {
-    return prec(400, choice(
+    return prec(EXPRPREC.SIMPLE, choice(
       $.Number,
       $.String,
       $.Type,
@@ -599,6 +642,12 @@ const rules = {
   // [x] indexsuffix     <-- DotIndex / KeyIndex
   indexsuffix: $ => {
     return choice($.DotIndex, $.KeyIndex)
+  },
+  indexsuffix_callargs: $ => {
+    return prec.right(EXPRPREC.CALLARGS, seq(
+      field('index', choice($.DotIndex, $.KeyIndex)),
+      field('call', $.callargs)
+    ))
   },
   // [x] exprprim        <-- ppcallprim / id / DoExpr / Paren
   exprprim: $ => {
@@ -628,9 +677,9 @@ const rules = {
     )
   },
   // [x] Call            <== callargs
-  Call: $ => {
-    return $.callargs
-  },
+  // Call: $ => {
+  //   return $.callargs
+  // },
   // [x] CallMethod      <== `:` @name @callargs
   CallMethod: $ => {
     return seq(
@@ -651,7 +700,7 @@ const rules = {
   },
   // [x] callsuffix      <-- Call / CallMethod
   callsuffix: $ => {
-    return choice($.Call, $.CallMethod)
+    return choice($.callargs, $.CallMethod)
   },
   vars: $ => {
     return listOf($.var)
@@ -755,13 +804,16 @@ const rules = {
 
    // <<-- TYPE EXPRESSIONS -->>
    typeexpr: $ => {
-     // FIXME Need to understand prec rule for this case
-     return prec.left(400, seq(
-       $.typeexprunary, 
-       field('variation', optional($.typevaris)),
-     ))
+     return choice($.typeexprunary, $.typeexpr_variation)
    },
-   // [ ] typexprsimple   <-- RecordType / UnionType / EnumType / FuncType / ArrayType / PointerType /
+
+   typeexpr_variation: $ => {
+     return prec(400, seq(
+       $.typeexprunary, 
+       field('variation', $.typevaris),
+     ))
+   }
+,   // [ ] typexprsimple   <-- RecordType / UnionType / EnumType / FuncType / ArrayType / PointerType /
    //                     VariantType / (typeexprprim typeopgen?)~>foldleft
    typeexprsimple: $ => {
      return prec.left(choice(
@@ -772,7 +824,7 @@ const rules = {
        $.ArrayType,
        $.PointerType,
        $.VariantType, 
-       seq($.typeexprprim, optional($.typeopgen))
+       choice($.typeexprprim, seq($.typeexprprim, $.typeopgen))
      ))
    },
 

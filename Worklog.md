@@ -1,3 +1,77 @@
+### 9-4-2024
+I was able to solve the issue with variation precedence fairly easily using essentially the method I proposed at the end of yesterday's work session. "Eliminate optional, replace with choice" is the gist of the pattern, and it may be applicable in other places.
+
+It did make me think about how messy the direct translation from the PEG is, and really it's partially because I've been ignoring tokens that aren't real in the PEG. I don't quite know what to do about it yet, but after I think after I finish the rest of the smoke tests, I may move on to the next phase this week.
+
+I believe I also will have a few more rules to port, but I think I'm starting to close in on full coverage.
+
+During testing I was wondering why the operator field wasn't showing up. Apparently https://github.com/tree-sitter/tree-sitter/issues/767 is a thing, and specifically mentions tree-sitter-c. This is fairly surprising behavior, and I'd like to use a different pattern, honestly. I asked about it in the tree-sitter discord today, as now I'm not sure I should be using parse for spot checking if it's going to hide things the queries can see.
+
+- [x] Rewrite binary expressions to use a different pattern that allows for the operator field to show up during a parse.
+- [x] Fix Call rule, it's currently erroring
+  - Fixed the trivial case by removing the unnecessary Call rule, then using a right associativity instead of left on exprsuffixed. This doesn't appear to be working on a repeat case though, e.g. `a.b.c()` is failing
+  - [x] Create a indexsuffix rule that has a guaranteed call as part of its rule
+    - `a.b.c()` failing: My current strategy for fixing this is to think about what types of pattern seem to work well. Getting rid of optional worked, so I'm going to try and make the `choice` here a bit clearer and see if that helps the parser decide correctly. My theory right now is that it's still trying to parse the Name once it hits the parens, instead of seeing it as a choice between an id vs a call.
+    - This strategy worked, resulting in a choice between indexsuffix and indexsuffix_callargs. It will probably will crop up again, as the PEG seems to encourage this pattern when translating directly. 
+
+
+**Spot Checks**
+- [x] type variations
+- [x] Binary Expressions
+  - [x] or
+  - [x] and
+  - [x] == (cmp)
+  - [x] ~=
+  - [x] <=
+  - [x] <
+  - [x] >=
+  - [x] >
+  - [x] |
+  - [x] ~
+  - [x] &
+  - [x] <<
+  - [x] >>>
+  - [x] >>
+  - [x] ..
+  - [x] + 
+  - [x] - 
+  - [x] * 
+  - [x] /// 
+  - [x] // 
+  - [x] / 
+  - [x] %%% 
+  - [x] % 
+- [x] Unary expressions
+  - [x] not
+  - [x] -
+  - [x] #
+  - [x] ~
+  - [x] &
+  - [x] $
+- [x] Combo binary and unary, e.g. `1 - -1`
+- [x] InitList
+  - [x] empty
+  - [x] single
+  - [x] multiple
+- [x] true
+- [x] false
+- [x] nilptr
+- [x] nil
+- [x] ... (varargs)
+- [ ] suffixed expressions
+  - [x] id
+    - [x] simple
+    - [x] single index suffix
+    - [x] single call suffix
+    - [x] single index suffix, single call suffix
+    - [x] index suffix, key suffix, call suffix
+    - [x] call suffix with str
+    - [x] call suffix with parens containing expression
+    - [x] call suffix with init list
+  - [ ] preprocessor call (ppcallprim)
+  - [ ] do expression
+  - [ ] parens
+
 ### 9-3-2024
 Trying to find my place after a long weekend without coding. Looks like we're filling in the `expression` rule (`expr` in the PEG). I'll be running generate more often during this worksession, as I ran into a lot of precedence resolution I didn't really understand last time.
 
@@ -6,7 +80,7 @@ I've got the simple assign expression parsing without error, but right now it's 
 - [x] Fix `a = b` reading a Type
   - This resulted from a bad translation of Type from the PEG, I missed that it was a sequence.
 
-**Smoke Tests**
+**Spot Checks**
 - [x] number assignment
 - [x] double quote string assignment
 - [x] single quote string assignment
