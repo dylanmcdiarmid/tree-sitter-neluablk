@@ -30,6 +30,18 @@
         {
           "type": "SYMBOL",
           "name": "long_pp"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "FuncDef"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "localfunc"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "globalfunc"
         }
       ]
     },
@@ -538,11 +550,11 @@
       "members": [
         {
           "type": "STRING",
-          "value": "function"
+          "value": "local"
         },
         {
           "type": "STRING",
-          "value": "local"
+          "value": "function"
         },
         {
           "type": "SYMBOL",
@@ -559,11 +571,11 @@
       "members": [
         {
           "type": "STRING",
-          "value": "function"
+          "value": "global"
         },
         {
           "type": "STRING",
-          "value": "global"
+          "value": "function"
         },
         {
           "type": "SYMBOL",
@@ -600,8 +612,16 @@
           "value": "("
         },
         {
-          "type": "SYMBOL",
-          "name": "funcargs"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "funcargs"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -641,8 +661,16 @@
           ]
         },
         {
-          "type": "SYMBOL",
-          "name": "Block"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "Block"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -2526,38 +2554,100 @@
       ]
     },
     "indexsuffix_callargs": {
-      "type": "PREC_RIGHT",
-      "value": 6,
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "FIELD",
-            "name": "index",
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "index",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "DotIndex"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "KeyIndex"
+              }
+            ]
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "call",
+          "content": {
+            "type": "PREC_RIGHT",
+            "value": 0,
             "content": {
+              "type": "REPEAT1",
+              "content": {
+                "type": "SYMBOL",
+                "name": "callargs"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "callargs": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "("
+            },
+            {
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SYMBOL",
-                  "name": "DotIndex"
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "expression"
+                    },
+                    {
+                      "type": "REPEAT",
+                      "content": {
+                        "type": "SEQ",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "expression"
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "KeyIndex"
+                  "type": "BLANK"
                 }
               ]
+            },
+            {
+              "type": "STRING",
+              "value": ")"
             }
-          },
-          {
-            "type": "FIELD",
-            "name": "call",
-            "content": {
-              "type": "SYMBOL",
-              "name": "callargs"
-            }
-          }
-        ]
-      }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "InitList"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "String"
+        }
+      ]
     },
     "exprprim": {
       "type": "CHOICE",
@@ -2871,65 +2961,6 @@
               }
             ]
           }
-        }
-      ]
-    },
-    "callargs": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "("
-            },
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "expression"
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "SEQ",
-                        "members": [
-                          {
-                            "type": "STRING",
-                            "value": ","
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "expression"
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
-            },
-            {
-              "type": "STRING",
-              "value": ")"
-            }
-          ]
-        },
-        {
-          "type": "SYMBOL",
-          "name": "InitList"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "String"
         }
       ]
     },
@@ -4341,7 +4372,12 @@
       "value": "\\s"
     }
   ],
-  "conflicts": [],
+  "conflicts": [
+    [
+      "indexsuffix",
+      "indexsuffix_callargs"
+    ]
+  ],
   "precedences": [],
   "externals": [
     {

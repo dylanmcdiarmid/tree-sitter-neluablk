@@ -80,11 +80,23 @@
           "named": true
         },
         {
+          "type": "FuncDef",
+          "named": true
+        },
+        {
           "type": "Label",
           "named": true
         },
         {
           "type": "comment",
+          "named": true
+        },
+        {
+          "type": "globalfunc",
+          "named": true
+        },
+        {
+          "type": "localfunc",
           "named": true
         },
         {
@@ -254,6 +266,25 @@
         },
         {
           "type": "iddecl",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FuncDef",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "funcbody",
+          "named": true
+        },
+        {
+          "type": "funcname",
           "named": true
         }
       ]
@@ -1095,7 +1126,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "Block",
@@ -1350,7 +1381,7 @@
     "named": true,
     "fields": {
       "call": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {

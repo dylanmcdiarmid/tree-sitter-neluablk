@@ -1,3 +1,27 @@
+### 9-5-2024
+- [x] callargs is trouble. `a(1)` is NOT working, `a.b(1)` IS working, `a.b(1)(2)` is NOT working
+  - This rule isn't really particularly strange, so I'm going to see how it's implemented in javascript/c
+  - I'm not sure how much help I'm getting here, it seems to be some interference between Paren being a valid expression, but I don't quite get where things are going wrong. Calls like `b.c'a''b'` work, as does b.c(a)'b', but b.c(a)(b) does not work, and instead it looks like we attempt to parse an expression. 
+  - tree-sitter is sending me off the deep end today. In callargs, it seems it's particularly the `seq` that breaks it. For example, I can use `seq('(', ')')` and it will fail, but if I match against `'()'` it will work using example `b.c()()`
+  - Ultimately adding a "conflicts" entry between indexsuffix and its variations worked, but I'm not entirely sure why. My understanding is that it forces a resolution at runtime. I think this is something I'll address once I move on to the cleanup phase.
+
+Moving on to finish the spot checks today... 
+**Spot Checks**
+- [x] preprocessor call (ppcallprim) - I think this is like foo!('bar') but I'm not super familiar with the language. nelua --print-ast does recognize it
+- [x] do expression
+- [x] parens
+
+These last expression spot checks cover everything an Assign can do. Next I'd like to handle function declaration, which I think will also lead to full coverage of type declarations (although of course we can also test that through Assign to Type, which is `a = @mytype` syntax.
+
+**FuncDef**
+- [x] Simple case: `local function f() end`
+- [ ] funcargs
+  - [ ] VarargsType
+- [ ] funcrets
+- [ ] annots
+- [ ] body Block
+
+
 ### 9-4-2024
 I was able to solve the issue with variation precedence fairly easily using essentially the method I proposed at the end of yesterday's work session. "Eliminate optional, replace with choice" is the gist of the pattern, and it may be applicable in other places.
 

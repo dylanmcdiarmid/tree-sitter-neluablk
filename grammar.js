@@ -100,6 +100,9 @@ const rules = {
       // $.string_block, 
       $.short_pp, 
       $.long_pp,
+      $.FuncDef,
+      $.localfunc,
+      $.globalfunc,
     )
   },
   _statement: $ => {
@@ -233,11 +236,11 @@ const rules = {
   },
 // [x] localfunc  : FuncDef  <== `function` $'local' @namedecl @funcbody
   localfunc: $ => {
-    return seq('function', 'local', $.Name, $.funcbody)
+    return seq('local', 'function', $.Name, $.funcbody)
   },
 // [x] globalfunc : FuncDef  <== `function` $'global' @namedecl @funcbody
   globalfunc: $ => {
-    return seq('function', 'global', $.Name, $.funcbody)
+    return seq('global', 'function', $.Name, $.funcbody)
   },
 // [x] FuncDef         <== `function` $false @funcname @funcbody
   FuncDef: $ => {
@@ -246,11 +249,11 @@ const rules = {
 // [x] funcbody        <-- `(` funcargs @`)` (`:` @funcrets)~? annots~? Block @`end`
   funcbody: $ => {
     return seq('(', 
-      $.funcargs,
+      optional($.funcargs),
       ')',
       optional(seq(':', $.funcrets)),
       optional($.annots),
-      $.Block,
+      optional($.Block),
       'end'
     )
   },
@@ -644,10 +647,24 @@ const rules = {
     return choice($.DotIndex, $.KeyIndex)
   },
   indexsuffix_callargs: $ => {
-    return prec.right(EXPRPREC.CALLARGS, seq(
+    return seq(
       field('index', choice($.DotIndex, $.KeyIndex)),
-      field('call', $.callargs)
-    ))
+      // field('call', prec(1000, repeat1($.callargs)))
+      field('call', prec.right(repeat1($.callargs)))
+      // field('call', prec.right(repeat1($.justatest)))
+    )
+  },
+  // [x] callargs        <-| `(` (expr (`,` @expr)*)? @`)` / InitList / String
+  callargs: $ => {
+    return choice(
+      seq(
+        '(',
+        optional(listOf($.expression)),
+        ')'
+      ),
+      $.InitList,
+      $.String
+    )
   },
   // [x] exprprim        <-- ppcallprim / id / DoExpr / Paren
   exprprim: $ => {
@@ -740,18 +757,6 @@ const rules = {
   // [x] iddecls         <-| iddecl (`,` @iddecl)*
   iddecls: $ => {
     return listOf($.iddecl)
-  },
-  // [x] callargs        <-| `(` (expr (`,` @expr)*)? @`)` / InitList / String
-  callargs: $ => {
-    return choice(
-      seq(
-        '(',
-        optional(listOf($.expression)),
-        ')'
-      ),
-      $.InitList,
-      $.String
-    )
   },
 
 // [x] cmp             <-- `==`->'eq' / forcmp
@@ -1127,7 +1132,12 @@ const G = {
   name,
   externals,
   rules,
-  extras
+  extras,
+  conflicts: $ => {
+    return [
+      [$.indexsuffix, $.indexsuffix_callargs]
+    ]
+  },
 }
 
 module.exports = grammar(G)
