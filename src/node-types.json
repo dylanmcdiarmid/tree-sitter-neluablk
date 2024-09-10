@@ -92,7 +92,15 @@
           "named": true
         },
         {
+          "type": "global",
+          "named": true
+        },
+        {
           "type": "globalfunc",
+          "named": true
+        },
+        {
+          "type": "local",
           "named": true
         },
         {
@@ -1224,6 +1232,44 @@
     }
   },
   {
+    "type": "generic",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "typeexprprim",
+          "named": true
+        },
+        {
+          "type": "typeopgen",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "global",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "globalfunc",
+          "named": true
+        },
+        {
+          "type": "globalvar",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "globalfunc",
     "named": true,
     "fields": {},
@@ -1404,6 +1450,25 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "local",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "localfunc",
+          "named": true
+        },
+        {
+          "type": "localvar",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -1639,7 +1704,28 @@
   {
     "type": "suffixeddecl",
     "named": true,
-    "fields": {},
+    "fields": {
+      "expr": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "typeexpr",
+            "named": true
+          }
+        ]
+      },
+      "punc": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": ":",
+            "named": false
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
@@ -1654,10 +1740,6 @@
         },
         {
           "type": "name",
-          "named": true
-        },
-        {
-          "type": "typeexpr",
           "named": true
         }
       ]
@@ -1823,7 +1905,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
@@ -1855,11 +1937,11 @@
           "named": true
         },
         {
-          "type": "typeexprprim",
+          "type": "generic",
           "named": true
         },
         {
-          "type": "typeopgen",
+          "type": "typeexprprim",
           "named": true
         }
       ]

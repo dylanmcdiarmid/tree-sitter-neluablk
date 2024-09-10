@@ -27,14 +27,21 @@ Basic testing will be done during this phase by running `tree-sitter parse` on e
 
 Tracking features as they are completed in: [features.md](features.md)
 
-## Phase 3 - Queries/Tests
+## Phase 3 - Specimens
+_Incomplete_
+
+_Added 9-9-2024_
+
+Language specimens should be gathered and assigned syntax highlighting scopes. These specimens will be used to create test files, and as guidance for the cleanup phase. Specimens will be a combination of tests from the nelua AST tests `syntaxdefs_spec.lua`, the documentation, and existing nelua code. At the end of this phase we should have a method for managing specimens and generating test files.
+
+## Phase 4 - Queries/Tests
 _Incomplete_
 
 At this point the major features will be implemented, and I'll start cleaning up the AST, adding
 fields where they make sense, and in general making sure everything is well organized for its
 primary purpose.
 
-## Phase 4 - Cleanup/Finalization
+## Phase 5 - Cleanup/Finalization
 _Incomplete_
 
 At this point I'll start comparing the project to other well regarded tree-sitter projects

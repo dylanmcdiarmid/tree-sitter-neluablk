@@ -1,4 +1,4 @@
-local function boop() 
+local function boop(a, b) 
 
 end
 

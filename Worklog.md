@@ -1,3 +1,61 @@
+### 9-9-2024
+
+**Type Expressions**
+- [x] Simple expressions: Id and IdDecl
+  - [x] typeexpr
+    - [x] typeexprunary
+      - [ ] 0 prefix
+        - this is typeexprsimple
+        - [x] typeexprprim
+          - [x] Id
+          - [x] IdSuffixed
+        - [x] RecordType
+        - [x] UnionType
+        - [x] EnumType
+        - [x] EnumType with values
+        - [x] FuncType
+          - [x] simple: function()
+          - [x] with ret
+          - [x] with args and ret
+        - [x] ArrayType
+        - [x] PointerType
+          - [x] simple
+          - [x] specific
+          - [x] * alias
+            - (this parses but we may need to adjust the AST)
+        - [x] VariantType
+          - [x] keyword variant
+          - [x] pipe separated
+        - [x] GenericType
+          - This is represented by the typeopgen rule, and did not work on first try
+          - I think it's the same problem we had with callargs involving parens. I was able to save it the same way, giving `$.generic` a high precedence and creating a conflict for the choice
+          - [x] Fix GenericType
+      - [x] 1 prefix
+      - [x] 2 prefix
+    - [x] typevaris
+    - [x] typeexprprim
+  - [x] annots
+
+I've been thinking about how I'd like to proceed now that I've almost completely the complete PEG -> tree-sitter port. Now that I've had the experience of doing the port, in retrospect I would have preferred to have a list of specimens that I have classified into expected scopes (scopes in the context of syntax highlighting https://tree-sitter.github.io/tree-sitter/syntax-highlighting ).
+
+Originally I had Phase 3 setup to be the cleanup/syntax highlighting phase. Instead I'm going to do a Phase 3 that is purely preparing and documenting specimens so that when I do the cleanup I have something I can use as a guide.
+
+It should just be FuncDef to go and I'll be ready for the next phase, I will try and finish that up tomorrow.
+
+**FuncDef**
+- [x] Simple case: `local function f() end`
+- [ ] funcargs
+  - [ ] iddecl
+    - [ ] pp_expr
+    - [x] id
+    - [x] id (list)
+    - [ ] id: typeexpr
+  - [ ] VarargsType
+- [ ] funcrets
+- [ ] annots
+- [ ] body Block
+
+
 ### 9-5-2024
 - [x] callargs is trouble. `a(1)` is NOT working, `a.b(1)` IS working, `a.b(1)(2)` is NOT working
   - This rule isn't really particularly strange, so I'm going to see how it's implemented in javascript/c
@@ -15,12 +73,6 @@ These last expression spot checks cover everything an Assign can do. Next I'd li
 
 **FuncDef**
 - [x] Simple case: `local function f() end`
-- [ ] funcargs
-  - [ ] VarargsType
-- [ ] funcrets
-- [ ] annots
-- [ ] body Block
-
 
 ### 9-4-2024
 I was able to solve the issue with variation precedence fairly easily using essentially the method I proposed at the end of yesterday's work session. "Eliminate optional, replace with choice" is the gist of the pattern, and it may be applicable in other places.
@@ -204,12 +256,3 @@ Going a bit broad today, sketching out a bunch of stuff straight out of the PEG.
 
 - [ ] Preprocess expression
 - [x] Simple expressions: Varargs
-- [ ] Simple expressions: Id and IdDecl
-  - [ ] typeexpr
-    - [ ] typeexprunary
-    - [ ] typevaris
-    - [ ] typeopunary
-    - [ ] typeexprsimple
-    - [ ] typeexprprim
-  - [ ] annots
-- [ ] Types

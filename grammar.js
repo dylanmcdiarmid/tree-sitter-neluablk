@@ -103,6 +103,8 @@ const rules = {
       $.FuncDef,
       $.localfunc,
       $.globalfunc,
+      $.local,
+      $.global,
     )
   },
   _statement: $ => {
@@ -302,8 +304,8 @@ const rules = {
       choice($.idsuffixed, $.name),
       optional(
         seq(
-          ':',
-          $.typeexpr
+          field('punc', ':'),
+          field('expr', $.typeexpr)
         )
       ),
       optional($.annots)
@@ -320,11 +322,11 @@ const rules = {
   },
 // [x] localvar   : VarDecl  <== $'local' @suffixeddecls (`=` @exprs)?
   localvar: $ => {
-    return seq('local', $.suffixeddecls, optional(seq('=', listOf($.expression))))
+    return seq($.suffixeddecls, optional(seq('=', listOf($.expression))))
   },
 // [x] globalvar  : VarDecl  <== $'global' @suffixeddecls (`=` @exprs)?
   globalvar: $ => {
-    return seq('global', $.suffixeddecls, optional(seq('=', listOf($.expression))))
+    return seq($.suffixeddecls, optional(seq('=', listOf($.expression))))
   },
 // [x] Assign          <== vars `=` @exprs
   Assign: $ => {
@@ -829,8 +831,12 @@ const rules = {
        $.ArrayType,
        $.PointerType,
        $.VariantType, 
-       choice($.typeexprprim, seq($.typeexprprim, $.typeopgen))
+       choice($.typeexprprim, $.generic)
      ))
+   },
+
+   generic: $ => {
+     return prec.right(400, seq($.typeexprprim, $.typeopgen))
    },
 
    // typeexprunary   <-- (typeopunary* typexprsimple)->rfoldleft
@@ -838,12 +844,12 @@ const rules = {
      return seq(repeat(field('unary', $.typeopunary)), field('type', $.typeexprsimple))
    },
 
-   // typeopgen : GenericType   <== `(` @typeargs @`)` / &`{` {| InitList |}
 
    // FIXME: this is an alias and probably doesn't need to exist in the type-sitter grammar
    typeopvar: $ => {
      return $.typevaris
    },
+   // typeopgen : GenericType   <== `(` @typeargs @`)` / &`{` {| InitList |}
    typeopgen: $ => {
      return choice(
        seq(
@@ -1135,7 +1141,8 @@ const G = {
   extras,
   conflicts: $ => {
     return [
-      [$.indexsuffix, $.indexsuffix_callargs]
+      [$.indexsuffix, $.indexsuffix_callargs],
+      [$.typeexprprim, $.generic]
     ]
   },
 }
