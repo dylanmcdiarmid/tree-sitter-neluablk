@@ -84,10 +84,6 @@
           "named": true
         },
         {
-          "type": "Label",
-          "named": true
-        },
-        {
           "type": "comment",
           "named": true
         },
@@ -1124,6 +1120,10 @@
         {
           "type": "iddecl",
           "named": true
+        },
+        {
+          "type": "pp_expr",
+          "named": true
         }
       ]
     }
@@ -1131,29 +1131,7 @@
   {
     "type": "funcbody",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "Block",
-          "named": true
-        },
-        {
-          "type": "annots",
-          "named": true
-        },
-        {
-          "type": "funcargs",
-          "named": true
-        },
-        {
-          "type": "funcrets",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "funcname",
@@ -1612,7 +1590,25 @@
   {
     "type": "pp_expr",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "pp_expr_body",
+          "named": true
+        },
+        {
+          "type": "pp_expr_end",
+          "named": true
+        },
+        {
+          "type": "pp_expr_start",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "pp_name",
@@ -1667,24 +1663,15 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
-        {
-          "type": "short_pp_body",
-          "named": true
-        },
         {
           "type": "short_pp_start",
           "named": true
         }
       ]
     }
-  },
-  {
-    "type": "short_pp_body",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "source_file",
@@ -2144,10 +2131,6 @@
     "named": false
   },
   {
-    "type": "#]",
-    "named": false
-  },
-  {
     "type": "#|",
     "named": false
   },
@@ -2281,6 +2264,10 @@
   },
   {
     "type": "]",
+    "named": false
+  },
+  {
+    "type": "]#",
     "named": false
   },
   {
@@ -2514,6 +2501,18 @@
   {
     "type": "pointer",
     "named": false
+  },
+  {
+    "type": "pp_expr_body",
+    "named": true
+  },
+  {
+    "type": "pp_expr_end",
+    "named": true
+  },
+  {
+    "type": "pp_expr_start",
+    "named": true
   },
   {
     "type": "record",

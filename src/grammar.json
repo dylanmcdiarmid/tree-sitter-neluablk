@@ -13,10 +13,6 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "Label"
-        },
-        {
-          "type": "SYMBOL",
           "name": "Assign"
         },
         {
@@ -613,6 +609,27 @@
       ]
     },
     "funcbody": {
+      "type": "PREC",
+      "value": 500,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "#["
+          },
+          {
+            "type": "PATTERN",
+            "value": "[ab]"
+          },
+          {
+            "type": "STRING",
+            "value": "]#"
+          }
+        ]
+      }
+    },
+    "funcbody1": {
       "type": "SEQ",
       "members": [
         {
@@ -718,18 +735,48 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "iddecl"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
+          "type": "PREC",
+          "value": 500,
+          "content": {
+            "type": "SYMBOL",
+            "name": "pp_expr"
+          }
+        },
+        {
+          "type": "PREC",
+          "value": 400,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "iddecl"
+                  },
+                  {
+                    "type": "REPEAT",
+                    "content": {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": ","
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "iddecl"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
                     "type": "SEQ",
                     "members": [
                       {
@@ -738,39 +785,25 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "iddecl"
+                        "name": "VarargsType"
                       }
                     ]
+                  },
+                  {
+                    "type": "BLANK"
                   }
-                }
-              ]
-            },
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "VarargsType"
-                    }
-                  ]
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
-            }
-          ]
+                ]
+              }
+            ]
+          }
         },
         {
-          "type": "SYMBOL",
-          "name": "VarargsType"
+          "type": "PREC",
+          "value": 300,
+          "content": {
+            "type": "SYMBOL",
+            "name": "VarargsType"
+          }
         }
       ]
     },
@@ -4245,14 +4278,10 @@
           "name": "short_pp_start"
         },
         {
-          "type": "SYMBOL",
-          "name": "short_pp_body"
+          "type": "PATTERN",
+          "value": "(\\\\+(.|\\r?\\n)|[^\\\\\\n])*"
         }
       ]
-    },
-    "short_pp_body": {
-      "type": "PATTERN",
-      "value": "(\\\\+(.|\\r?\\n)|[^\\\\\\n])*"
     },
     "long_pp": {
       "type": "SEQ",
@@ -4343,20 +4372,16 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "STRING",
-          "value": "#["
+          "type": "SYMBOL",
+          "name": "pp_expr_start"
         },
         {
-          "type": "FIELD",
-          "name": "body",
-          "content": {
-            "type": "PATTERN",
-            "value": "(\\\\+(.|\\r?\\n)|[^\\\\\\n])*"
-          }
+          "type": "SYMBOL",
+          "name": "pp_expr_body"
         },
         {
-          "type": "STRING",
-          "value": "#]"
+          "type": "SYMBOL",
+          "name": "pp_expr_end"
         }
       ]
     },
@@ -4392,10 +4417,6 @@
     [
       "indexsuffix",
       "indexsuffix_callargs"
-    ],
-    [
-      "typeexprprim",
-      "generic"
     ]
   ],
   "precedences": [],
@@ -4435,6 +4456,18 @@
     {
       "type": "SYMBOL",
       "name": "long_pp_end"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "pp_expr_start"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "pp_expr_body"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "pp_expr_end"
     },
     {
       "type": "SYMBOL",

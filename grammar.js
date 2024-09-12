@@ -1,5 +1,5 @@
 /*
-[ ] How does precendence work?
+[/ ] How does precendence work?
   [x] What does precedence look like when we do a nelua --print-ast
     In tree-sitter terms, a or b and c = BinaryOp "or" a (BinaryOp "and" b c)
                           a and b or c = BinaryOp (BinaryOp "and" a b) "or" c
@@ -71,6 +71,9 @@ const externals = $ => {
     $.long_pp_start,
     $.long_pp_body,
     $.long_pp_end,
+    $.pp_expr_start,
+    $.pp_expr_body,
+    $.pp_expr_end,
     // $.string_content,
     // $.string_block_end,
     // error sentinel should never be included in the rules, 
@@ -93,13 +96,14 @@ const rules = {
   },
   Block: $ => {
     return choice(
-      $.Label, // remove? 
+      // $.Label, // remove? 
       // $.expression, // remove? 
       $.Assign,
       $.comment, 
       // $.string_block, 
       $.short_pp, 
       $.long_pp,
+      // $.pp_expr,
       $.FuncDef,
       $.localfunc,
       $.globalfunc,
@@ -248,10 +252,19 @@ const rules = {
   FuncDef: $ => {
     return seq('function', $.funcname, $.funcbody)
   },
-// [x] funcbody        <-- `(` funcargs @`)` (`:` @funcrets)~? annots~? Block @`end`
+  // fake funcbody for troubleshooting
   funcbody: $ => {
-    return seq('(', 
+    // return prec(500, seq('(', $.pp_expr, ')'))
+    // return prec(500, seq('(', $.pp_expr, ')'))
+    return prec(500, seq('#[', /[ab]/, ']#'))
+  },
+// [x] funcbody        <-- `(` funcargs @`)` (`:` @funcrets)~? annots~? Block @`end`
+  funcbody1: $ => {
+    return seq(
+      '(', 
       optional($.funcargs),
+      // $.funcargs,
+      // $.pp_expr,
       ')',
       optional(seq(':', $.funcrets)),
       optional($.annots),
@@ -267,7 +280,8 @@ const rules = {
   // n.b. pulling optional out of this and adding it to the referer
   funcargs: $ => {
     return choice(
-      seq(
+      prec(500, $.pp_expr),
+      prec(400, seq(
         listOf($.iddecl),
         optional(
           seq(
@@ -275,8 +289,8 @@ const rules = {
             $.VarargsType
           )
         )
-      ),
-      $.VarargsType
+      )),
+      prec(300, $.VarargsType)
     )
   },
 // [x] suffixeddecls   <-| suffixeddeclexpr (`,` @suffixeddeclexpr)*
@@ -335,6 +349,7 @@ const rules = {
 // [x] Preprocess      <== PREPROCESS SKIP
   Preprocess: $ => {
     return choice($.long_pp, $.short_pp)
+    // return $.long_pp
   },
   // --------------
 
@@ -1073,10 +1088,7 @@ const rules = {
   
   // ## for i = 1,4 do
   short_pp: $ => {
-    return seq($.short_pp_start, $.short_pp_body)
-  },
-  short_pp_body: $ => {
-    return anythingButLinebreakRe
+    return seq($.short_pp_start, anythingButLinebreakRe)
   },
   // ##[=[ local foo = [[mystring]] ]=]
   long_pp: $ => {
@@ -1106,9 +1118,14 @@ const rules = {
     return seq($._name_prefix, $._name_suffix)
   },
   // PreprocessExpr `#[` {@expr->0} @`]#`
-  // I'm pretty sure the body is Lua, not Nelua, so we'll just capture anything and inject highlighting
   pp_expr: $ => {
-    return seq('#[', field('body', anythingButLinebreakRe), '#]')
+    // return '#[b]#'
+    // return /\#\[.+\]\#/
+    // return seq('^[', 'b', ']^')
+    return seq($.pp_expr_start, $.pp_expr_body, $.pp_expr_end)
+    // return seq(/\#\[/, /.+/, /\]\#/)
+    // return prec.left(400, token(seq('#[', field('body', anythingButLinebreakRe), '#]')))
+    // return prec.left(400, seq('#[', field('body', anythingButLinebreakRe), '#]'))
   },
   // PreprocessName
   pp_name: $ => {
@@ -1141,8 +1158,7 @@ const G = {
   extras,
   conflicts: $ => {
     return [
-      [$.indexsuffix, $.indexsuffix_callargs],
-      [$.typeexprprim, $.generic]
+      [$.indexsuffix, $.indexsuffix_callargs]
     ]
   },
 }

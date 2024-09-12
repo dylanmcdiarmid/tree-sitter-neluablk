@@ -34,6 +34,9 @@ enum TokenType {
   LONG_PP_START,
   LONG_PP_BODY,
   LONG_PP_END,
+  PP_EXPR_START,
+  PP_EXPR_BODY,
+  PP_EXPR_END,
   // LONG_COMMENT_END,
   // should never be used in grammar.js.
   // this allows us to determine if we're in error recovery
@@ -151,9 +154,15 @@ static bool scan_comment_start(Scanner *scanner, TSLexer *lexer) {
   return true;
 }
 
-static bool scan_pp_start(Scanner *scanner, TSLexer *lexer) {
-  printf("Top of scan pp start!\n");
+static bool scan_pp_start(Scanner *scanner, TSLexer *lexer, bool may_be_expr) {
+  printf("Top of scan pp start! May be expr? %d\n", may_be_expr);
   ADVANCE_OR_FALSE(lexer, '#')
+  if (may_be_expr && lexer->lookahead == '[') {
+    advance(lexer);
+    lexer->result_symbol = PP_EXPR_START;
+    printf("We are a pp_expr start because we are #[\n");
+    return true;
+  }
   ADVANCE_OR_FALSE(lexer, '#')
   // If we detect we're in a long comment start, we'll mark the end somewhere else
   lexer->mark_end(lexer);
@@ -192,6 +201,30 @@ static bool scan_pp_start(Scanner *scanner, TSLexer *lexer) {
     }
   }
   return true;
+}
+
+static bool scan_pp_expr_body(Scanner *scanner, TSLexer *lexer) {
+  // line breaks are errors
+  for (;;) {
+    if (lexer->lookahead == ']') {
+      lexer->mark_end(lexer);
+      advance(lexer);
+      if (lexer->eof(lexer)) {
+        printf("PPEXPRBODY>Found EOF in ]# check\n");
+        return false;
+      }
+      if (lexer->lookahead == '#') {
+        printf("PPEXPRBODY>Found pp_expr ending of ]#, returning true.\n");
+        return true;
+      }
+    }
+    // otherwise we accept anything but a line break
+    if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
+      printf("PPEXPRBODY>found a line break, returning false\n");
+      return false;
+    }
+    advance(lexer);
+  }
 }
 
 static bool scan_body(Scanner *scanner, TSLexer *lexer) {
@@ -353,7 +386,7 @@ bool tree_sitter_neluablk_external_scanner_scan
   if (lexer->lookahead == '#' && valid_symbols[SHORT_PP_START] && valid_symbols[LONG_PP_START]) {
     printf("In PP_START main branch\n");
     lexer->result_symbol = SHORT_PP_START;
-    return scan_pp_start(scanner, lexer);
+    return scan_pp_start(scanner, lexer, valid_symbols[PP_EXPR_START]);
   }
 
   // --- Bodies -------------
@@ -368,6 +401,12 @@ bool tree_sitter_neluablk_external_scanner_scan
     lexer->result_symbol = LONG_PP_BODY;
     return scan_body(scanner, lexer);
   }
+
+  if (valid_symbols[PP_EXPR_BODY]) {
+    printf("In PP_EXPR_BODY main branch\n");
+    lexer->result_symbol = PP_EXPR_BODY;
+    return scan_pp_expr_body(scanner, lexer);
+  }
   // ------------------------
 
   // --- Endings ------------
@@ -381,6 +420,14 @@ bool tree_sitter_neluablk_external_scanner_scan
     printf("In LONG_PP_END main branch\n");
     lexer->result_symbol = LONG_PP_END;
     return scan_ending(scanner, lexer);
+  }
+
+  if (valid_symbols[PP_EXPR_END]) {
+    printf("In PP_EXPR_END main branch\n");
+    lexer->result_symbol = PP_EXPR_END;
+    ADVANCE_OR_FALSE(lexer, ']')
+    ADVANCE_OR_FALSE(lexer, '#')
+    return true;
   }
   // ------------------------
 

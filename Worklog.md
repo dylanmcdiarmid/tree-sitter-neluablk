@@ -1,10 +1,51 @@
+### 9-11-2024
+Starting today with attempting to create an additional set of symbols in the external scanner, to hopefully clean up the conflicts I'm seeing with external scanner and sequences that start with a hash.
+
+pp_expr works in a vacuum (for example it works substituting for an id in an Assign, like `#[whatever]# = "foo"`) but it still fails in the context of funcbody. I think funcbody is just doing a lot because it has so many optionals, including Block (which then opens it up for a ton of conflicts).
+
+My next troubleshooting attempt will be to rebuild funcbody bit by bit, looking for the exact place it starts to error.
+
+- [ ] Rebuild funcbody piece by piece
+  - [x] static match - `local function a funcbody`
+  - [x] static seq match - `local function a ()`
+  - [x] static argument - `local function a (myarg)`
+  - [ ] just ppexpr - `local function a #[abc]`
+    - [ ] Once again it looks like we're having problems specifically with the # character. Lets try and match it exactly.
+    - [ ] Another potential solve is removing some of the more general places a pp_expr can be, like $.id
+  - [ ] ppexpr argument - `local function a (#[abc])`
+
+### 9-10-2024
+
+The problem today is `local function a(#[b]#)`. Once again we can make this pass by changing the token rule for pp_expr to something more specific, such as an exact match or a regular expression. Switching to `seq` it errors again.
+
+I tried out using --debug-graph to compare versions that work (regex or exact) with those that don't (seq). 
+
+I think in this case we may have a conflict with the external scanner, which is why this behavior feels particularly weird. Lets allow the external grammar to be used instead of the pp_expr variation.
+
+- [x] Try changing out the hash for a different character to see if this only is a conflict with the symbols we look for in the external scanner
+  - Adding more specificity for the body portion actually works fine, we should be on track for solving this. Right now the theory is that the regular expression is just too greedy
+
+**FuncDef**
+- [x] Simple case: `local function f() end`
+- [ ] funcargs
+  - [ ] iddecl
+    - [ ] pp_expr
+      - This didn't work and requires troubleshooting
+    - [x] id
+    - [x] id (list)
+    - [ ] id: typeexpr
+  - [ ] VarargsType
+- [ ] funcrets
+- [ ] annots
+- [ ] body Block
+
 ### 9-9-2024
 
 **Type Expressions**
 - [x] Simple expressions: Id and IdDecl
   - [x] typeexpr
     - [x] typeexprunary
-      - [ ] 0 prefix
+      - [x] 0 prefix
         - this is typeexprsimple
         - [x] typeexprprim
           - [x] Id
@@ -41,19 +82,6 @@ I've been thinking about how I'd like to proceed now that I've almost completely
 Originally I had Phase 3 setup to be the cleanup/syntax highlighting phase. Instead I'm going to do a Phase 3 that is purely preparing and documenting specimens so that when I do the cleanup I have something I can use as a guide.
 
 It should just be FuncDef to go and I'll be ready for the next phase, I will try and finish that up tomorrow.
-
-**FuncDef**
-- [x] Simple case: `local function f() end`
-- [ ] funcargs
-  - [ ] iddecl
-    - [ ] pp_expr
-    - [x] id
-    - [x] id (list)
-    - [ ] id: typeexpr
-  - [ ] VarargsType
-- [ ] funcrets
-- [ ] annots
-- [ ] body Block
 
 
 ### 9-5-2024

@@ -1,4 +1,1 @@
-local function boop(a, b) 
-
-end
-
+local function a #[a]#
