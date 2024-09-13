@@ -1,3 +1,19 @@
+### 9-12-2024
+- [ ] Extra closing
+- [ ] Rebuild funcbody piece by piece
+  - [x] static match - `local function a funcbody`
+  - [x] static seq match - `local function a ()`
+  - [x] static argument - `local function a (myarg)`
+  - [ ] just ppexpr - `local function a #[abc]`
+    - [x] Once again it looks like we're having problems specifically with the # character. Lets try and match it exactly.
+      - Exact matches work, as does a regex, as does $.pp_expr_body.
+      - So it's not # that is the problem necessarily, it looks like it's conflicts potentially with Parens
+      - Exact sequence works
+      - There was a problem with pp_start_expr, it's been corrected in the scanner.c
+    - [ ] Another potential solve is removing some of the more general places a pp_expr can be, like $.id
+ - [ ] ppexpr argument - `local function a (#[abc])`
+
+
 ### 9-11-2024
 Starting today with attempting to create an additional set of symbols in the external scanner, to hopefully clean up the conflicts I'm seeing with external scanner and sequences that start with a hash.
 

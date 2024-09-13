@@ -256,7 +256,9 @@ const rules = {
   funcbody: $ => {
     // return prec(500, seq('(', $.pp_expr, ')'))
     // return prec(500, seq('(', $.pp_expr, ')'))
-    return prec(500, seq('#[', /[ab]/, ']#'))
+    // return prec(500, seq('(', '#[', $.pp_expr_body, ']#', ')'))
+    // return prec(500, seq('(', $.pp_expr_start, $.pp_expr_body, $.pp_expr_end, ')'))
+    return prec(500, seq('(', $.pp_expr, ')'))
   },
 // [x] funcbody        <-- `(` funcargs @`)` (`:` @funcrets)~? annots~? Block @`end`
   funcbody1: $ => {

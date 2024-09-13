@@ -1131,7 +1131,17 @@
   {
     "type": "funcbody",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "pp_expr",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "funcname",
@@ -2127,10 +2137,6 @@
     "named": false
   },
   {
-    "type": "#[",
-    "named": false
-  },
-  {
     "type": "#|",
     "named": false
   },
@@ -2264,10 +2270,6 @@
   },
   {
     "type": "]",
-    "named": false
-  },
-  {
-    "type": "]#",
     "named": false
   },
   {

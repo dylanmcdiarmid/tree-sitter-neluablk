@@ -383,10 +383,17 @@ bool tree_sitter_neluablk_external_scanner_scan
     return scan_comment_start(scanner, lexer);
   }
 
-  if (lexer->lookahead == '#' && valid_symbols[SHORT_PP_START] && valid_symbols[LONG_PP_START]) {
-    printf("In PP_START main branch\n");
-    lexer->result_symbol = SHORT_PP_START;
-    return scan_pp_start(scanner, lexer, valid_symbols[PP_EXPR_START]);
+  if (lexer->lookahead == '#') {  
+    if (valid_symbols[PP_EXPR_START] && !valid_symbols[SHORT_PP_START] && !valid_symbols[LONG_PP_START]) {
+      lexer->result_symbol = PP_EXPR_START;    
+      ADVANCE_OR_FALSE(lexer, '#')
+      ADVANCE_OR_FALSE(lexer, '[')
+      return true;
+    } else if (valid_symbols[SHORT_PP_START] && valid_symbols[LONG_PP_START]) {
+      printf("In PP_START main branch\n");
+      lexer->result_symbol = SHORT_PP_START;
+      return scan_pp_start(scanner, lexer, valid_symbols[PP_EXPR_START]);
+    }
   }
 
   // --- Bodies -------------

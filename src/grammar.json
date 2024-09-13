@@ -616,15 +616,15 @@
         "members": [
           {
             "type": "STRING",
-            "value": "#["
+            "value": "("
           },
           {
-            "type": "PATTERN",
-            "value": "[ab]"
+            "type": "SYMBOL",
+            "name": "pp_expr"
           },
           {
             "type": "STRING",
-            "value": "]#"
+            "value": ")"
           }
         ]
       }

@@ -1,1 +1,1 @@
-local function a #[a]#
+local function a (#[abc bca whatever]#)
