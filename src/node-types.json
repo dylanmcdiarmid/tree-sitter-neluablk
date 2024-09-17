@@ -73,7 +73,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "Assign",
@@ -133,6 +133,10 @@
         },
         {
           "type": "While",
+          "named": true
+        },
+        {
+          "type": "call",
           "named": true
         },
         {
@@ -1026,6 +1030,29 @@
     "fields": {}
   },
   {
+    "type": "call",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "callsuffix",
+          "named": true
+        },
+        {
+          "type": "exprprim",
+          "named": true
+        },
+        {
+          "type": "indexed_calls",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "callargs",
     "named": true,
     "fields": {},
@@ -1628,6 +1655,25 @@
         },
         {
           "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "indexed_calls",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "callsuffix",
+          "named": true
+        },
+        {
+          "type": "indexsuffix",
           "named": true
         }
       ]

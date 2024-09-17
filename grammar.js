@@ -123,7 +123,8 @@ const rules = {
       $.Fallthrough,
       $.Goto,
       $.Label,
-      $.call
+      $.call,
+      ';'
     )
   },
   _statement: $ => {
@@ -367,12 +368,7 @@ const rules = {
     return choice(
       $.binary_expression,
       $.unary_expression,
-      // PEG: exprsimple
       $.exprsimple,
-      // just used for testing
-      // $._temporary_expression
-      // $.simple_expression,
-      // $.primary_expression
     )
   },
 
@@ -670,8 +666,11 @@ const rules = {
   call: $ => {
     return prec.right(seq(
       $.exprprim,
-      repeat1(choice($.callsuffix, seq(repeat1($.indexsuffix), $.callsuffix)))
+      repeat1(choice(prec(2, $.indexed_calls), prec(1, $.callsuffix)))
     ))
+  },
+  indexed_calls: $ => {
+    return seq(repeat1($.indexsuffix), $.callsuffix);  
   },
   // [x] indexsuffix     <-- DotIndex / KeyIndex
   indexsuffix: $ => {

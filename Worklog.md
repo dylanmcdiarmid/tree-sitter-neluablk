@@ -1,3 +1,8 @@
+### 9-17-2024
+- [x] Finish filling in and spot checking all top level rules in Block
+  - [x] call
+  - [x] semicolon
+
 ### 9-16-2024
 - [x] Rebuild funcbody piece by piece
   - [x] just ppexpr - `local function a #[abc]`

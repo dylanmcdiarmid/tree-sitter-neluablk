@@ -106,6 +106,10 @@
         {
           "type": "SYMBOL",
           "name": "call"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
         }
       ]
     },
@@ -2640,30 +2644,42 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SYMBOL",
-                  "name": "callsuffix"
+                  "type": "PREC",
+                  "value": 2,
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "indexed_calls"
+                  }
                 },
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "REPEAT1",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "indexsuffix"
-                      }
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "callsuffix"
-                    }
-                  ]
+                  "type": "PREC",
+                  "value": 1,
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "callsuffix"
+                  }
                 }
               ]
             }
           }
         ]
       }
+    },
+    "indexed_calls": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "indexsuffix"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "callsuffix"
+        }
+      ]
     },
     "indexsuffix": {
       "type": "CHOICE",
