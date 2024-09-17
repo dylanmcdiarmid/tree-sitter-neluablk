@@ -109,6 +109,21 @@ const rules = {
       $.globalfunc,
       $.local,
       $.global,
+      $.Return,
+      $.Do,
+      $.In,
+      $.Defer,
+      $.If,
+      $.Switch,
+      $.for,
+      $.While,
+      $.Repeat,
+      $.Break,
+      $.Continue,
+      $.Fallthrough,
+      $.Goto,
+      $.Label,
+      $.call
     )
   },
   _statement: $ => {
@@ -155,7 +170,7 @@ const rules = {
   },
 // [x] If              <== `if` ifs (`else` Block)? @`end`
   If: $ => {
-    return seq('ifs', $.ifs, optional(seq('else', $.Block)), 'end')
+    return seq('if', $.ifs, optional(seq('else', $.Block)), 'end')
   },
 // [x] ifs             <-| @expr @`then` Block (`elseif` @expr @`then` Block)*
   ifs: $ => {
@@ -258,21 +273,11 @@ const rules = {
     // return prec(500, seq('(', $.pp_expr, ')'))
     // return prec(500, seq('(', '#[', $.pp_expr_body, ']#', ')'))
     // return prec(500, seq('(', $.pp_expr_start, $.pp_expr_body, $.pp_expr_end, ')'))
-    return prec(500, seq('(', $.pp_expr, ')'))
-  },
-// [x] funcbody        <-- `(` funcargs @`)` (`:` @funcrets)~? annots~? Block @`end`
-  funcbody1: $ => {
-    return seq(
-      '(', 
-      optional($.funcargs),
-      // $.funcargs,
-      // $.pp_expr,
-      ')',
-      optional(seq(':', $.funcrets)),
-      optional($.annots),
-      optional($.Block),
-      'end'
-    )
+    return prec(500, seq('(', optional($.funcargs), ')',
+            optional(seq(':', $.funcrets)),
+            optional($.annots),
+            optional($.Block),
+        'end'))
   },
 // [x] funcname        <-- (id DotIndex* ColonIndex?)~>rfoldright
   funcname: $ => {
@@ -660,6 +665,13 @@ const rules = {
   // oppow     : BinaryOp  <== `^`->'pow' @exprunary
   oppow: $ => {
     return seq('^', $.exprunary)
+  },
+  // [] call            <-- (exprprim (callsuffix / indexsuffix+ callsuffix)+)~>rfoldright
+  call: $ => {
+    return prec.right(seq(
+      $.exprprim,
+      repeat1(choice($.callsuffix, seq(repeat1($.indexsuffix), $.callsuffix)))
+    ))
   },
   // [x] indexsuffix     <-- DotIndex / KeyIndex
   indexsuffix: $ => {

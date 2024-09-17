@@ -1,0 +1,3 @@
+function fn(): pointer(*integer)
+  return 1
+end

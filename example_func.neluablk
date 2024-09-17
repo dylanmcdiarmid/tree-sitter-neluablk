@@ -1,1 +1,3 @@
-local function a (#[abc bca whatever]#)
+local function a (a, b string) : boop <bop>
+	a = b
+end

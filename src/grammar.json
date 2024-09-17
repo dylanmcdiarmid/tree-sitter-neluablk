@@ -46,6 +46,66 @@
         {
           "type": "SYMBOL",
           "name": "global"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Return"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Do"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "In"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Defer"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "If"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Switch"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "for"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "While"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Repeat"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Break"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Continue"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Fallthrough"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Goto"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Label"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "call"
         }
       ]
     },
@@ -232,7 +292,7 @@
       "members": [
         {
           "type": "STRING",
-          "value": "ifs"
+          "value": "if"
         },
         {
           "type": "SYMBOL",
@@ -619,89 +679,72 @@
             "value": "("
           },
           {
-            "type": "SYMBOL",
-            "name": "pp_expr"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "funcargs"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
           },
           {
             "type": "STRING",
             "value": ")"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ":"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "funcrets"
+                  }
+                ]
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "annots"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "Block"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": "end"
           }
         ]
       }
-    },
-    "funcbody1": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "("
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "funcargs"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "STRING",
-          "value": ")"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": ":"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "funcrets"
-                }
-              ]
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "annots"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "STRING",
-          "value": "end"
-        }
-      ]
     },
     "funcname": {
       "type": "SEQ",
@@ -2580,6 +2623,47 @@
           "name": "exprunary"
         }
       ]
+    },
+    "call": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "exprprim"
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "callsuffix"
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "REPEAT1",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "indexsuffix"
+                      }
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "callsuffix"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     "indexsuffix": {
       "type": "CHOICE",

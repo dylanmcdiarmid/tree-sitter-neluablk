@@ -1,5 +1,43 @@
+### 9-16-2024
+- [x] Rebuild funcbody piece by piece
+  - [x] just ppexpr - `local function a #[abc]`
+    - [x] Once again it looks like we're having problems specifically with the # character. Lets try and match it exactly.
+      - Exact matches work, as does a regex, as does $.pp_expr_body.
+      - So it's not # that is the problem necessarily, it looks like it's conflicts potentially with Parens
+      - Exact sequence works
+      - There was a problem with pp_start_expr, it's been corrected in the scanner.c
+    - [x] Another potential solve is removing some of the more general places a pp_expr can be, like $.id
+ - [x] ppexpr argument - `local function a (#[abc])`
+
+I've been working a bit more sporadically on this project over the past week, but this appears to be solved, and I'm not quite sure what did it. They main two things that were done was moving pp_expr to scanner (which I still don't entirely think should be necessary, 
+but it may have helped with some precedence issues), and then giving funcbody precedence of 500. I'll need to get the precedence stuff sorted out better in a future phase, for now I'm content to just have the spot checking working.
+
+- [ ] Finish filling in and spot checking all top level rules in Block
+  - [x] Return - `return a`
+  - [x] Do - `do in nil end`
+  - [x] In - `do in nil end`
+  - [x] Defer - `defer in nil end`
+  - [x] If
+    - [x] simple
+    - [x] elseif
+    - [x] else
+    - this parses fine but will definitely need AST organizing
+  - [x] Switch
+    - [x] optional do
+    - [x] optional else
+  - [x] ForNum
+    - I think one of the example from syntaxdefs_spec is broken, where we declare a type like a:number = 10, but I think that's something we'll need to solve once we get iddecls fully sorted.
+  - [x] ForIn
+  - [x] While
+  - [x] Repeat
+  - [x] break/continue/fallthrough 
+  - [x] goto
+  - [x] label
+  - [ ] call
+
+For tomorrow: We're almost done with spot checks for all Block level rules, finish figuring out "call" precedence.
+
 ### 9-12-2024
-- [ ] Extra closing
 - [ ] Rebuild funcbody piece by piece
   - [x] static match - `local function a funcbody`
   - [x] static seq match - `local function a ()`
@@ -10,8 +48,6 @@
       - So it's not # that is the problem necessarily, it looks like it's conflicts potentially with Parens
       - Exact sequence works
       - There was a problem with pp_start_expr, it's been corrected in the scanner.c
-    - [ ] Another potential solve is removing some of the more general places a pp_expr can be, like $.id
- - [ ] ppexpr argument - `local function a (#[abc])`
 
 
 ### 9-11-2024
